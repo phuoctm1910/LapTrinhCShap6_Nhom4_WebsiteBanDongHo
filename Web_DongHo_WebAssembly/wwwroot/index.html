@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 
 <head>
@@ -6,7 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Web_DongHo_WebAssembly</title>
     <base href="/" />
-    <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" />
+    <!-- External Bootstrap CSS -->
+    <link href="boostrap/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Local CSS -->
     <link href="css/app.css" rel="stylesheet" />
     <link href="Web_DongHo_WebAssembly.styles.css" rel="stylesheet" />
 </head>
@@ -17,9 +19,12 @@
     <div id="blazor-error-ui">
         An unhandled error has occurred.
         <a href="" class="reload">Reload</a>
-        <a class="dismiss">🗙</a>
+        <a class="dismiss">X</a>
     </div>
+    <!-- Blazor WebAssembly -->
     <script src="_framework/blazor.webassembly.js"></script>
+    <script src="jquery/dist/jquery.min.js" crossorigin="anonymous"></script>
+    <script src="boostrap/js/bootstrap.bundle.js" crossorigin="anonymous"></script>
 </body>
 
 </html>

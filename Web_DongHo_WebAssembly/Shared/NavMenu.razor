@@ -1,29 +1,58 @@
-﻿<div class="top-row pl-4 navbar navbar-dark">
-    <a class="navbar-brand" href="">Web_DongHo_WebAssembly</a>
-    <button class="navbar-toggler" @onclick="ToggleNavMenu">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-</div>
-
-<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
-    <ul class="nav flex-column">
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="oi oi-home" aria-hidden="true"></span> Home
-            </NavLink>
-        </li>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="oi oi-plus" aria-hidden="true"></span> Counter
-            </NavLink>
-        </li>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="fetchdata">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Fetch data
-            </NavLink>
-        </li>
-    </ul>
-</div>
+﻿<nav class="navbar navbar-expand-lg bg-white border" style="padding: 0!important;">
+    <div class="row container-fluid p-0">
+        <a class="navbar-brand col-2 text-center" href="/">
+            <img src="images/logo.png" alt="logo" width="100px">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse col-7" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link nav-home" href="/about">Giới thiệu</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link nav-home" href="/contact">Liên hệ</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link nav-home" href="/products">Sản phẩm</a>
+                </li>
+            </ul>
+            <form class="d-flex" role="search" style="width: 400px;">
+                <div class="input-group">
+                    <input type="search" class="form-control" placeholder="Tìm kiếm" aria-describedby="button-addon2">
+                    <button class="btn btn-outline-dark" type="submit" id="button-addon2">Search</button>
+                </div>
+            </form>
+        </div>
+        <div class="col-3 position-relative text-dark">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0 position-absolute text-black" style="left: 90px;top: -20px;">
+                <li class="nav-item dropdown d-flex nav-home">
+                    <a class="nav-link dropdown-toggle text-start" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Tài khoản
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/register">Đăng ký</a></li>
+                        <li><a class="dropdown-item" href="/login">Đăng nhập</a></li>
+                        <li><a class="dropdown-item" href="/forgot-password">Quên mật khẩu</a></li>
+                        <hr />
+                        <li><a class="dropdown-item" href="/update-info">Đổi thông tin</a></li>
+                        <li><a class="dropdown-item" href="/change-password">Đổi mật khẩu</a></li>
+                        <li><a class="dropdown-item" href="/logout">Đăng xuất</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-end position-relative nav-home" role="button" href="/cart">
+                        Giỏ hàng
+                        <span class="position-absolute translate-middle badge rounded-pill bg-danger" style="top: 7px; right: -19px;">
+                            3
+                        </span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
 
 @code {
     private bool collapseNavMenu = true;
