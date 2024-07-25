@@ -1,13 +1,20 @@
 ﻿@inherits LayoutComponentBase
+@using Web_DongHo_WebAssembly.Shared
 
+<header>
+    <NavMenu />
+</header>
 <div class="page">
-    <div class="main">
-        <header>
-            <NavMenu />
 
-        </header>
+    <div class="main">
+
         <div class="px-4">
             @Body
         </div>
+
     </div>
+
 </div>
+<footer>
+    <FooterMain />
+</footer>

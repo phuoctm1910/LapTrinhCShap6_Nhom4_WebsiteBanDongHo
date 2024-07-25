@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Web_DongHo_API.Data;
 
@@ -25,14 +27,14 @@ namespace Web_DongHo_API.Controllers
             var productfirst8 = await _context.Products
                .Include(d => d.Category)
                .Include(d => d.Brand)
-            .Take(8)
+               .Take(8)
                .ToListAsync();
 
             var productsecond8 = await _context.Products
                .Include(d => d.Category)
                .Include(d => d.Brand)
                .Skip(productfirst8.Count)
-            .Take(8)
+               .Take(8)
                .ToListAsync();
 
             var productthird8 = await _context.Products
@@ -42,12 +44,20 @@ namespace Web_DongHo_API.Controllers
                .Take(8)
                .ToListAsync();
 
-            return Ok(new
+            var options = new JsonSerializerOptions
+            {
+                ReferenceHandler = ReferenceHandler.Preserve,
+                WriteIndented = true
+            };
+
+            var result = new
             {
                 Productfirst8 = productfirst8,
                 Productsecond8 = productsecond8,
                 ProductThird8 = productthird8,
-            });
+            };
+
+            return new JsonResult(result, options);
         }
     }
 }
