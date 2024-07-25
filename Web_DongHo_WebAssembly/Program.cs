@@ -12,6 +12,10 @@ namespace Web_DongHo_WebAssembly
 {
     public class Program
     {
+        private static async Task DebugDelayAsync()
+        {
+            await Task.Delay(5000);
+        }
         public static async Task Main(string[] args)
         {
             var builder = WebAssemblyHostBuilder.CreateDefault(args);
@@ -19,6 +23,7 @@ namespace Web_DongHo_WebAssembly
 
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
+            await DebugDelayAsync();
             await builder.Build().RunAsync();
         }
     }

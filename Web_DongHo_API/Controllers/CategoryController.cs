@@ -59,7 +59,7 @@ namespace Web_DongHo_API.Controllers
 
         // POST: api/Category
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
+        [HttpPost("postCategory")]
         public async Task<ActionResult> CreateCategory([FromBody] CategoryVM categoryVM)
         {
             var category = new Category
@@ -69,7 +69,7 @@ namespace Web_DongHo_API.Controllers
             _context.Categories.Add(category);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetCategory", new { id = category.CategoryId }, category);
+            return CreatedAtAction("GetAllCategories", new { id = category.CategoryId }, category);
         }
 
         // DELETE: api/Category/5

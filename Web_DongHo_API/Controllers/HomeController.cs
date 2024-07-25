@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -9,6 +10,12 @@ using Web_DongHo_API.Data;
 
 namespace Web_DongHo_API.Controllers
 {
+    public class HomeProductRequest
+    {
+        public List<Product> Productfirst8 { get; set; }
+        public List<Product> Productsecond8 { get; set; }
+        public List<Product> Productthird8 { get; set; }
+    }
     [Route("api/[controller]")]
     [ApiController]
     public class HomeController : ControllerBase
@@ -50,11 +57,11 @@ namespace Web_DongHo_API.Controllers
                 WriteIndented = true
             };
 
-            var result = new
+            var result = new HomeProductRequest
             {
                 Productfirst8 = productfirst8,
                 Productsecond8 = productsecond8,
-                ProductThird8 = productthird8,
+                Productthird8 = productthird8,
             };
 
             return new JsonResult(result, options);
