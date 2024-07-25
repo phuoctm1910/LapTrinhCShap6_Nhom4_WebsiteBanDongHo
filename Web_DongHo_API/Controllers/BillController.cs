@@ -31,7 +31,6 @@ namespace Web_DongHo_API.Controllers
                 .ToListAsync();
             return Ok(bills);
         }
-
         // GET: api/Bill/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Bill>> GetBillById(int id)
