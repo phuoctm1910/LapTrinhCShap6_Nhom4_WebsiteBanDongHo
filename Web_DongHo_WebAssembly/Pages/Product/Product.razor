@@ -1,0 +1,157 @@
+﻿@page "/sanpham"
+@using Web_DongHo_WebAssembly.Data
+@inject HttpClient http
+<div class="container">
+    <!--Slide ảnh-->
+    <div class="row">
+        <div id="carouselExampleDark" class="carousel carousel-dark slide" data-bs-ride="carousel">
+            <div class="carousel-indicators">
+                <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="0" class="active"
+                        aria-current="true" aria-label="Slide 1"></button>
+                <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="1"
+                        aria-label="Slide 2"></button>
+                <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="2"
+                        aria-label="Slide 3"></button>
+            </div>
+            <div class="carousel-inner">
+                <div class="carousel-item active">
+                    <img src="https://donghotantan.vn/images/products/manufactories//large/bulova-banner_1712631472.jpg"
+                         alt="Los Angeles" class="d-block" style="width:70%;height: 350px;margin: 0 auto;">
+                </div>
+                <div class="carousel-item">
+                    <img src="https://donghotantan.vn/images/products/manufactories//large/banner-lacoste_1710995099.jpg"
+                         alt="Chicago" class="d-block" style="width:70%;height: 350px;margin: 0 auto;">
+                </div>
+                <div class="carousel-item">
+                    <img src="https://h2watch.vn/wp-content/uploads/2020/03/dong-ho-tissot-banner.jpg"
+                         alt="New York" class="d-block" style="width:70%;height: 350px;margin: 0 auto;">
+                </div>
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleDark"
+                    data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleDark"
+                    data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+        </div>
+    </div>
+    <!--Button lọc loại sản phẩm-->
+    <div class="row sortList my-5">
+        <div class="text-center">
+            <h2 class="mt-5 mb-3" style="color: #383736; font-weight: 500">
+                THƯƠNG HIỆU
+            </h2>
+        </div>
+        <div class="d-flex flex-wrap justify-content-center mt-2 mb-5">
+            <a class="btnSort" style="text-decoration: none">CASIO</a>
+            <a class="btnSort" style="text-decoration: none">CITIZEN</a>
+            <a class="btnSort" style="text-decoration: none">OMEGA</a>
+            <a class="btnSort" style="text-decoration: none">GUCCI</a>
+            <a class="btnSort" style="text-decoration: none">SEIKO</a>
+            <a class="btnSort" style="text-decoration: none">COACH</a>
+            <a class="btnSort" style="text-decoration: none">ALFEX</a>
+            <a class="btnSort" style="text-decoration: none">TOMMY</a>
+        </div>
+    </div>
+    <!--Tải hướng dẫn sử dụng và sắp xếp theo chỉ định khác-->
+    <div class="row">
+        <div class="d-flex justify-content-between">
+            <div class="productCount">
+                <span>
+                    Tổng Sản Phẩm : <span id="totalProductCount">@Products.Count</span>
+                </span>
+            </div>
+            <div class="productfilter d-flex align-items-center">
+                <div class="productCount">
+                    <span>
+                        Download Catalogue <i class="fa-solid fa-download"></i> :
+                    </span>
+                </div>
+                <div>
+                    <a class="btn btnCata" href="https://drive.google.com/drive/folders/1yPZCbQAqy4hWBl-5wZhab78xNyDQFSLt?usp=sharing">Catalogue <i class="fa-solid fa-file"></i></a>
+                </div>
+                <span class="columnsSpace"></span>
+                <div class="fitlerSelect">
+                    <select class="filter-order fs-14">
+                        <option value="0">Xếp theo: Mặc định</option>
+                        <option value="1">Giá Thấp đến cao</option>
+                        <option value="2">Giá Cao đến thấp</option>
+                        <option value="3">Đang giảm giá</option>
+                        <option value="4">Nổi bật</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--Sản phẩm-->
+    <div class="row my-3" id="productContainer">
+        @foreach (var item in Products)
+        {
+            <div class="col-md-3 my-3 product">
+                <div>
+                    <div class="card">
+                        <div class="imgBox">
+                            <a class="card-link" asp-controller="ProductDetail" asp-action="Index" asp-route-id="@item.ProductId">
+                                @if (item.ProductImageList.Any())
+                                {
+                                    <img src="~/uploads/@item.ProductImageList.First())" width="280px" height="300px" alt="@item.ProductName" class="watch">
+                                }
+                                else
+                                {
+                                    <img src="~/uploads/default.png" alt="default image" class="watch">
+                                }
+                            </a>
+                        </div>
+                        <div class="contentBox">
+                            <h3>@item.ProductName</h3>
+                            <h2 class="price">@item.ProductPrice.ToString("#,##0").Replace(",", ".") ₫</h2>
+                            <button class="buy bg-btn addProduct" data-product-id="@item.ProductId">Thêm vào giỏ hàng</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+    @if (Products.Count > 8)
+    {
+        <div class="row" style="margin: 20px auto;width: fit-content;">
+            <button class="btnMore fill" id="btnShowMore">Xem Thêm <i class="fa-solid fa-plus"></i></button>
+            <button class="btnMore fill" id="btnShowLess" style="display:none;">Ẩn Bớt <i class="fa-solid fa-minus"></i></button>
+        </div>
+    }
+</div>
+
+@code {
+    private List<Web_DongHo_WebAssembly.Data.Product> Products { get; set; } = new List<Web_DongHo_WebAssembly.Data.Product>();
+    private bool IsLoading { get; set; } = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Replace with your actual API endpoint
+            var response = await http.GetAsync("https://localhost:44355/api/product");
+            if (response.IsSuccessStatusCode)
+            {
+                Products = await response.Content.ReadFromJsonAsync<List<Web_DongHo_WebAssembly.Data.Product>>();
+            }
+        }
+        catch (Exception ex)
+        {
+            // Handle exceptions
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task AddProductToBill(int productId)
+    {
+        // Implement your logic to add product to bill
+    }
+}
