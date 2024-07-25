@@ -119,7 +119,16 @@ namespace Web_DongHo_API
             });
             services.Configure<SmtpSettings>(Configuration.GetSection("SmtpSettings"));
             services.AddTransient<EmailService>();
-
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowSpecificOrigin",
+                    builder =>
+                    {
+                        builder.WithOrigins("https://localhost:44395")
+                               .AllowAnyHeader()
+                               .AllowAnyMethod();
+                    });
+            });
             services.AddHttpClient();
         }
 
@@ -137,7 +146,10 @@ namespace Web_DongHo_API
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
+
+            app.UseCors("AllowSpecificOrigin");
 
             app.UseEndpoints(endpoints =>
             {
