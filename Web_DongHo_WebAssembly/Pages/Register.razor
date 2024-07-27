@@ -1,0 +1,119 @@
+﻿@page "/register"
+@inject HttpClient HttpClient
+
+@* Inject thư viên này để có thể sử dụng javascirpt trong blazor *@
+@inject IJSRuntime JS
+
+@* Inject thư viên này để có thể di chuyển qua các trang khác *@
+@inject NavigationContext navigation
+
+<h3>Register</h3>
+
+@* form *@
+<div class="form-group">
+    <label for="fullName">Full Name</label>
+    <input type="text" class="form-control" @bind="@user.FullName" id="fullName" />
+</div>
+
+<div class="form-group">
+    <label for="userName">Username</label>
+    <input type="text" class="form-control" @bind="@user.UserName" id="userName" />
+</div>
+
+<div class="form-group">
+    <label for="password">Password</label>
+    <input type="password" class="form-control" @bind="@user.Password" id="password" />
+</div>
+
+<div class="form-group">
+    <label for="gender">Gender</label>
+    <select class="form-control" @bind="@user.Gender" id="gender">
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+        <option value="Other">Other</option>
+    </select>
+</div>
+
+<div class="form-group">
+    <label for="phoneNumber">Phone Number</label>
+    <input type="text" class="form-control" @bind="@user.PhoneNumber" id="phoneNumber" />
+</div>
+
+<div class="form-group">
+    <label for="birthDate">Birth Date</label>
+    <input type="date" class="form-control" @bind="@user.BirthDate" id="birthDate" />
+</div>
+
+@* Sử dụng hàm Register *@
+<button class="btn btn-primary" @onclick="RegisterUser">Register</button>
+
+@* Tạo thông báo lỗi hoặc thông báo thành công *@
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div class="toast fade" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <strong class="me-auto">Thông báo</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+            @toastMessage  
+        </div>
+    </div>
+</div>
+
+@code {
+    private UserRegistrationRequest user = new UserRegistrationRequest();
+    private string toastMessage = string.Empty;
+
+    // Hàm gửi request đến api
+    private async Task RegisterUser()
+    {
+        // Gửi request đến api/resigter cùng với gói dữ liệu user
+        var response = await HttpClient.PostAsJsonAsync<UserRegistrationRequest>("api/register", user);
+        if (response.IsSuccessStatusCode)
+        {
+            var result = await response.Content.ReadFromJsonAsync<RegistrationResponse>();
+            toastMessage = "Registration successful!";
+            ShowToast();
+        }
+        else
+        {
+            var errorResponse = await response.Content.ReadFromJsonAsync<ErrorResponse>();
+            toastMessage = errorResponse?.Message ?? "An unknown error occurred.";
+            ShowToast();
+        }
+    }
+
+    // Thêm vào @toastMessage trên kia
+    private void ShowToast()
+    {
+        // Xem này như 1 javascript
+        JS.InvokeVoidAsync("eval", "var toastElement = document.querySelector('.toast'); var toast = new bootstrap.Toast(toastElement); toast.show();");
+    }
+
+    // Tạo Model để gửi đến api vì chuyển qua xem api thì sẽ thấy nó yêu cầu [FromBody]
+    public class UserRegistrationRequest
+    {
+        public string FullName { get; set; }
+        public string UserName { get; set; }
+        public string Password { get; set; }
+        public string Gender { get; set; }
+        public string PhoneNumber { get; set; }
+        public DateTime BirthDate { get; set; }
+    }
+
+    // Model tình trạng Đăng ký
+    public class RegistrationResponse
+    {
+        public string Token { get; set; }
+        public string UserName { get; set; }
+        public string Email { get; set; }
+        public string FullName { get; set; }
+        public int RoleId { get; set; }
+    }
+
+    // Model thông báo lỗi 
+    public class ErrorResponse
+    {
+        public string Message { get; set; }
+    }
+}
