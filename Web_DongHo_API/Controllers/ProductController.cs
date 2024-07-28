@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -22,9 +24,19 @@ namespace Web_DongHo_API.Controllers
 
         // GET: api/Product
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Product>>> GetProducts()
+        public async Task<ActionResult<Product>> GetProducts()
         {
-            return await _context.Products.ToListAsync();
+            var products = await _context.Products
+                .Include(d => d.Category)
+               .Include(d => d.Brand)
+               .ToListAsync();
+
+            var options = new JsonSerializerOptions
+            {
+                ReferenceHandler = ReferenceHandler.Preserve,
+                WriteIndented = true
+            };
+            return new JsonResult(products, options);
         }
 
         // GET: api/Product/5

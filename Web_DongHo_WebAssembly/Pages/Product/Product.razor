@@ -1,8 +1,296 @@
-﻿@page "/sanpham"
-@using Web_DongHo_WebAssembly.Data
-@inject HttpClient http
+﻿@page "/product"
+@inject HttpClient Http
+@inject IJSRuntime JS
+@using Newtonsoft.Json;
+@using Web_DongHo_WebAssembly.Data;
+<style>
+
+    .home-title {
+        padding: 11px 20px;
+        background: linear-gradient(-92deg, #0083c1 0%, #1b4688 100%);
+        position: relative;
+        margin: 20px 0;
+        height: 55px;
+        display: inline-block;
+    }
+
+        .home-title::before {
+            position: absolute;
+            content: "";
+            border-top: 55px solid transparent;
+            border-left: 35px solid #0083c1;
+            right: -34px;
+            top: 0.6px;
+        }
+
+
+    .bg-btn {
+        background: linear-gradient(-92deg, #0083c1 0%, #1b4688 100%) !important;
+    }
+
+    .card {
+        position: relative;
+        width: 320px;
+        height: 480px;
+        background: #191919;
+        border-radius: 20px;
+        overflow: hidden;
+    }
+
+        .card::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            width: 100%;
+            height: 100%;
+            background: white;
+            transform: skewY(345deg);
+            transition: top 1s ease, transform 1s ease;
+        }
+
+        .card:hover::before {
+            top: -70%;
+            transform: skewY(390deg);
+        }
+
+        .card::after {
+            content: "CORSAIR";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            font-weight: 600;
+            font-size: 6em;
+            color: rgba(0, 0, 0, 0.1);
+        }
+
+        .card .imgBox {
+            position: relative;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding-top: 20px;
+            z-index: 1;
+        }
+
+        .card .contentBox {
+            position: relative;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 2;
+        }
+
+            .card .contentBox h3 {
+                font-size: 18px;
+                color: white;
+                font-weight: 500;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+
+            .card .contentBox .price {
+                font-size: 24px;
+                color: white;
+                font-weight: 700;
+                letter-spacing: 1px;
+            }
+
+            .card .contentBox .buy {
+                position: relative;
+                top: 100px;
+                opacity: 0;
+                padding: 10px 30px;
+                margin-top: 15px;
+                background: linear-gradient(-92deg, #262525 0%, #524e4e 100%) !important;
+                text-decoration: none;
+                background: #ffce00;
+                border-radius: 30px;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                transition: 1s;
+                color: white;
+                font-weight: 700;
+            }
+
+            .card .contentBox a {
+                color: white;
+                font-weight: 700;
+            }
+
+        .card:hover .contentBox .buy {
+            top: 0;
+            opacity: 1;
+        }
+
+    .card-link {
+        text-decoration: none;
+        /* Loại bỏ dấu gạch chân */
+        color: inherit;
+        /* Giữ nguyên màu chữ mặc định, không thay đổi khi là liên kết */
+    }
+
+        .card-link:hover,
+        .card-link:visited {
+            text-decoration: none;
+            /* Loại bỏ dấu gạch chân khi di chuột và sau khi đã truy cập */
+        }
+
+    .sortList {
+        width: 950px !important;
+        margin: 0 auto !important;
+    }
+
+    .btnList:has(button:hover) button:not(:hover) {
+        transition: filter 1s ease-in-out;
+        filter: blur(4px)
+    }
+    /* Khi button được focus */
+    /* Khi chỉa vào button */
+    .btnList button {
+        transition: transform 0.5s ease-in-out; /* Transition */
+    }
+
+        .btnList button:hover {
+            transform: scale(1.5); /* Zoom ra */
+        }
+
+    .btnSort {
+        padding: 9px 18px;
+        cursor: pointer;
+        border: 2px solid #383736;
+        background-color: white;
+        color: #383736;
+        font-size: 18px;
+        font-weight: 500;
+        margin-right: 14px;
+        border-radius: 10px;
+        margin-bottom: 8px;
+        -webkit-transition: 0.2s;
+        transition: 0.2s;
+    }
+
+        .btnSort:hover {
+            color: whitesmoke;
+            background-color: #383736;
+        }
+
+    .btnCata {
+        padding: 2px 9px;
+        cursor: pointer;
+        border: 2px solid #383736;
+        background-color: white;
+        color: #383736;
+        font-size: 18px;
+        font-weight: 700;
+        margin: 0px 5px;
+        border-radius: 6px;
+        transition: 0.2s;
+    }
+
+        .btnCata:hover {
+            color: whitesmoke;
+            background-color: #383736;
+        }
+
+    .productCount {
+        color: #383736;
+        font-size: 24px;
+        line-height: 28px;
+        font-weight: bold;
+    }
+
+    .columnsSpace {
+        border: 2px solid #383736;
+        width: 1px;
+        display: inline-block;
+        height: 100%;
+    }
+
+    .fitlerSelect {
+        position: relative;
+        margin: 0 5px;
+    }
+
+        .fitlerSelect::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            border-width: 8px 7px 0;
+            border-style: solid;
+            border-color: #383736 transparent transparent;
+            pointer-events: none;
+        }
+
+        .fitlerSelect select {
+            border-radius: 6px;
+            border: 2px solid #383736;
+            overflow: hidden;
+            color: #383736;
+            font-size: 18px;
+            font-weight: 700;
+            padding: 2px 9px;
+            padding-right: 30px;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background: white;
+            cursor: pointer;
+        }
+
+    .btnMore {
+        position: relative;
+        //display:block;
+        height: 45px;
+        width: 150px;
+        margin: 10px 7px;
+        padding: 5px 5px;
+        font-weight: 700;
+        font-size: 15px;
+        letter-spacing: 2px;
+        color: #383736;
+        border: 2px #383736 solid;
+        border-radius: 4px;
+        text-transform: uppercase;
+        outline: 0;
+        overflow: hidden;
+        background: none;
+        z-index: 1;
+        cursor: pointer;
+        transition: 0.1s ease-in;
+        -o-transition: 0.1s ease-in;
+        -ms-transition: 0.1s ease-in;
+        -moz-transition: 0.1s ease-in;
+        -webkit-transition: 0.1s ease-in;
+    }
+
+    .fill:hover {
+        color: whitesmoke;
+    }
+
+    .fill:before {
+        content: "";
+        position: absolute;
+        background: #383736;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        top: 100%;
+        z-index: -1;
+        -webkit-transition: top 0.2s ease-in;
+    }
+
+    .fill:hover:before {
+        top: 0;
+    }
+</style>
+
 <div class="container">
-    <!--Slide ảnh-->
+    <!-- Slide ảnh -->
     <div class="row">
         <div id="carouselExampleDark" class="carousel carousel-dark slide" data-bs-ride="carousel">
             <div class="carousel-indicators">
@@ -39,7 +327,8 @@
             </button>
         </div>
     </div>
-    <!--Button lọc loại sản phẩm-->
+
+    <!-- Button lọc loại sản phẩm -->
     <div class="row sortList my-5">
         <div class="text-center">
             <h2 class="mt-5 mb-3" style="color: #383736; font-weight: 500">
@@ -57,66 +346,49 @@
             <a class="btnSort" style="text-decoration: none">TOMMY</a>
         </div>
     </div>
-    <!--Tải hướng dẫn sử dụng và sắp xếp theo chỉ định khác-->
-    <div class="row">
-        <div class="d-flex justify-content-between">
-            <div class="productCount">
-                <span>
-                    Tổng Sản Phẩm : <span id="totalProductCount">@Products.Count</span>
-                </span>
-            </div>
-            <div class="productfilter d-flex align-items-center">
-                <div class="productCount">
-                    <span>
-                        Download Catalogue <i class="fa-solid fa-download"></i> :
-                    </span>
-                </div>
-                <div>
-                    <a class="btn btnCata" href="https://drive.google.com/drive/folders/1yPZCbQAqy4hWBl-5wZhab78xNyDQFSLt?usp=sharing">Catalogue <i class="fa-solid fa-file"></i></a>
-                </div>
-                <span class="columnsSpace"></span>
-                <div class="fitlerSelect">
-                    <select class="filter-order fs-14">
-                        <option value="0">Xếp theo: Mặc định</option>
-                        <option value="1">Giá Thấp đến cao</option>
-                        <option value="2">Giá Cao đến thấp</option>
-                        <option value="3">Đang giảm giá</option>
-                        <option value="4">Nổi bật</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!--Sản phẩm-->
+
+    <!-- Sản phẩm -->
     <div class="row my-3" id="productContainer">
-        @foreach (var item in Products)
+        @if (products == null)
         {
-            <div class="col-md-3 my-3 product">
-                <div>
-                    <div class="card">
-                        <div class="imgBox">
-                            <a class="card-link" asp-controller="ProductDetail" asp-action="Index" asp-route-id="@item.ProductId">
-                                @if (item.ProductImageList.Any())
-                                {
-                                    <img src="~/uploads/@item.ProductImageList.First())" width="280px" height="300px" alt="@item.ProductName" class="watch">
-                                }
-                                else
-                                {
-                                    <img src="~/uploads/default.png" alt="default image" class="watch">
-                                }
-                            </a>
-                        </div>
-                        <div class="contentBox">
-                            <h3>@item.ProductName</h3>
-                            <h2 class="price">@item.ProductPrice.ToString("#,##0").Replace(",", ".") ₫</h2>
-                            <button class="buy bg-btn addProduct" data-product-id="@item.ProductId">Thêm vào giỏ hàng</button>
+            <p>Loading products...</p>
+        }
+        else if (!products.Any())
+        {
+            <p>No products available.</p>
+        }
+        else
+        {
+            @foreach (var item in products)
+            {
+                <div class="col-md-3 my-3 product">
+                    <div>
+                        <div class="card">
+                            <div class="imgBox">
+                                <a class="card-link" href="productdetail/@item.ProductId">
+                                    @if (true)
+                                    {
+                                        <img src="images/Product/@item.ProductImages" width="280px" height="300px" alt="@item.ProductName" class="watch">
+                                    }
+                                    else
+                                    {
+                                        <img src="uploads/default.png" alt="default image" class="watch">
+                                    }
+                                </a>
+                            </div>
+                            <div class="contentBox">
+                                <h3>@item.ProductName</h3>
+                                <h2 class="price">@item.ProductPrice.ToString("#,##0").Replace(",", ".") ₫</h2>
+                                <button class="buy bg-btn addProduct" data-product-id="@item.ProductId">Thêm vào giỏ hàng</button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            }
         }
     </div>
-    @if (Products.Count > 8)
+
+    @if (products != null && products.Count > 8)
     {
         <div class="row" style="margin: 20px auto;width: fit-content;">
             <button class="btnMore fill" id="btnShowMore">Xem Thêm <i class="fa-solid fa-plus"></i></button>
@@ -126,32 +398,24 @@
 </div>
 
 @code {
-    private List<Web_DongHo_WebAssembly.Data.Product> Products { get; set; } = new List<Web_DongHo_WebAssembly.Data.Product>();
-    private bool IsLoading { get; set; } = true;
+    private List<Web_DongHo_WebAssembly.Data.Product> products;
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            // Replace with your actual API endpoint
-            var response = await http.GetAsync("https://localhost:44355/api/product");
-            if (response.IsSuccessStatusCode)
+            var response = await Http.GetStringAsync("api/product");
+            products = JsonConvert.DeserializeObject<List<Web_DongHo_WebAssembly.Data.Product>>(response);
+
+            if (products == null)
             {
-                Products = await response.Content.ReadFromJsonAsync<List<Web_DongHo_WebAssembly.Data.Product>>();
+                Console.WriteLine("No products found.");
             }
         }
         catch (Exception ex)
         {
-            // Handle exceptions
+            Console.WriteLine($"Error fetching products: {ex.Message}");
         }
-        finally
-        {
-            IsLoading = false;
-        }
-    }
-
-    private async Task AddProductToBill(int productId)
-    {
-        // Implement your logic to add product to bill
     }
 }
+

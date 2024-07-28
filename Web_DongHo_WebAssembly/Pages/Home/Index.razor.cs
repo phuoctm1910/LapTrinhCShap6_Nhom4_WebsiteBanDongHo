@@ -48,8 +48,8 @@ namespace Web_DongHo_WebAssembly.Pages.Home
     }
     public class HomeProductRequest
     {
-        public List<Product> Productfirst8 { get; set; }
-        public List<Product> Productsecond8 { get; set; }
-        public List<Product> Productthird8 { get; set; }
+        public List<Web_DongHo_WebAssembly.Data.Product> Productfirst8 { get; set; }
+        public List<Web_DongHo_WebAssembly.Data.Product> Productsecond8 { get; set; }
+        public List<Web_DongHo_WebAssembly.Data.Product> Productthird8 { get; set; }
     }
 }
