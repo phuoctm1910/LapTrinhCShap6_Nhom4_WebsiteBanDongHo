@@ -19,7 +19,7 @@ namespace Web_DongHo_WebAssembly
         public static async Task Main(string[] args)
         {
             var builder = WebAssemblyHostBuilder.CreateDefault(args);
-            builder.RootComponents.Add<App>("#app");
+            builder.RootComponents.Add<Web_DongHo_WebAssembly.App>("#app");
 
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:44355/") });
 

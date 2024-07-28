@@ -4,13 +4,18 @@ using System.Threading.Tasks;
 using System;
 using Newtonsoft.Json;
 using System.Collections.Generic;
-using Web_DongHo_WebAssembly.Data;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Web_DongHo_WebAssembly.Pages
 {
+    public class HomeProductRequest
+    {
+        public List<Web_DongHo_WebAssembly.Data.Product> Productfirst8 { get; set; }
+        public List<Web_DongHo_WebAssembly.Data.Product> Productsecond8 { get; set; }
+        public List<Web_DongHo_WebAssembly.Data.Product> Productthird8 { get; set; }
+    }
     public partial class Index : ComponentBase
     {
         [Inject]
@@ -45,11 +50,5 @@ namespace Web_DongHo_WebAssembly.Pages
                 Console.WriteLine($"An unexpected error occurred: {ex.Message}");
             }
         }
-    }
-    public class HomeProductRequest
-    {
-        public List<Product> Productfirst8 { get; set; }
-        public List<Product> Productsecond8 { get; set; }
-        public List<Product> Productthird8 { get; set; }
     }
 }
