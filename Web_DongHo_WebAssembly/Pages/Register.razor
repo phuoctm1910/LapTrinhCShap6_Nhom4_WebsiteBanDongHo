@@ -1,11 +1,8 @@
 ﻿@page "/register"
 @inject HttpClient HttpClient
-
 @* Inject thư viên này để có thể sử dụng javascirpt trong blazor *@
 @inject IJSRuntime JS
-
 @* Inject thư viên này để có thể di chuyển qua các trang khác *@
-@inject NavigationContext navigation
 
 <h3>Register</h3>
 
@@ -25,14 +22,19 @@
     <input type="password" class="form-control" @bind="@user.Password" id="password" />
 </div>
 
-<div class="form-group">
-    <label for="gender">Gender</label>
-    <select class="form-control" @bind="@user.Gender" id="gender">
-        <option value="Male">Male</option>
-        <option value="Female">Female</option>
-        <option value="Other">Other</option>
-    </select>
+<div class="input-group">
+    <label>Gender</label>
+    <div>
+        <input type="radio" id="male" name="gender" value="true" @onchange="() => user.Gender = true" checked="@user.Gender" />
+        <label for="male">Male</label>
+    </div>
+    <div>
+        <input type="radio" id="female" name="gender" value="false" @onchange="() => user.Gender = false" />
+        <label for="female">Female</label>
+    </div>
 </div>
+
+
 
 <div class="form-group">
     <label for="phoneNumber">Phone Number</label>
@@ -55,7 +57,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
         </div>
         <div class="toast-body">
-            @toastMessage  
+            @toastMessage
         </div>
     </div>
 </div>
@@ -68,7 +70,7 @@
     private async Task RegisterUser()
     {
         // Gửi request đến api/resigter cùng với gói dữ liệu user
-        var response = await HttpClient.PostAsJsonAsync<UserRegistrationRequest>("api/register", user);
+        var response = await HttpClient.PostAsJsonAsync<UserRegistrationRequest>("api/Account/register", user);
         if (response.IsSuccessStatusCode)
         {
             var result = await response.Content.ReadFromJsonAsync<RegistrationResponse>();
@@ -94,10 +96,10 @@
     public class UserRegistrationRequest
     {
         public string FullName { get; set; }
+        public bool Gender { get; set; }
+        public string PhoneNumber { get; set; }
         public string UserName { get; set; }
         public string Password { get; set; }
-        public string Gender { get; set; }
-        public string PhoneNumber { get; set; }
         public DateTime BirthDate { get; set; }
     }
 
@@ -106,12 +108,10 @@
     {
         public string Token { get; set; }
         public string UserName { get; set; }
-        public string Email { get; set; }
-        public string FullName { get; set; }
         public int RoleId { get; set; }
     }
 
-    // Model thông báo lỗi 
+    // Model thông báo lỗi
     public class ErrorResponse
     {
         public string Message { get; set; }

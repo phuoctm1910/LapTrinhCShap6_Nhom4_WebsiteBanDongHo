@@ -42,6 +42,18 @@ namespace Web_DongHo_API.Controllers
         public string NewPassword { get; set; }
         public string ConfirmNewPassword { get; set; }
     }
+    public class ErrorResponse
+    {
+        public string Message { get; set; }
+    }
+
+    public class Login_RegistrationResponse
+    {
+        public string Token { get; set; }
+        public string UserName { get; set; }
+        public int RoleId { get; set; }
+    }
+
     [Route("api/[controller]")]
     [ApiController]
     public class AccountController : ControllerBase
@@ -124,15 +136,13 @@ namespace Web_DongHo_API.Controllers
                     && x.Password.Equals(hashPassBeforeCheck));
             if (user != null)
             {
-                var token = _tokenService.GenerateToken(request.UserName, user.RoleId);
+                var token = _tokenService.GenerateToken(user.UserName, user.RoleId);
 
-                return Ok(new
+                return Ok(new Login_RegistrationResponse
                 {
-                    token = token,
-                    userName = user.UserName,
-                    email = user.Email,
-                    fullName = user.FullName,
-                    roleId = user.RoleId
+                    Token = token,
+                    UserName = user.UserName,
+                    RoleId = user.RoleId
                 });
             }
 
@@ -143,7 +153,7 @@ namespace Web_DongHo_API.Controllers
         {
             if (!ModelState.IsValid || string.IsNullOrEmpty(request.Password))
             {
-                return BadRequest(new { message = "Invalid registration details." });
+                return BadRequest(new ErrorResponse { Message = "Invalid registration details." });
             }
 
             var existingUser = await _context.Users
@@ -151,7 +161,7 @@ namespace Web_DongHo_API.Controllers
 
             if (existingUser)
             {
-                return Conflict(new { message = "Username or email already exists." });
+                return Conflict(new ErrorResponse {  Message = "Username or email already exists." });
             }
 
             var hashedPassword = PasswordHelper.GetMd5Hash(request.Password);
@@ -172,11 +182,11 @@ namespace Web_DongHo_API.Controllers
 
             var token = _tokenService.GenerateToken(newUser.UserName, newUser.RoleId);
 
-            return Ok(new
+            return Ok(new Login_RegistrationResponse
             {
-                token = token,
-                userName = newUser.UserName,
-                roleId = newUser.RoleId
+                Token = token,
+                UserName = newUser.UserName,
+                RoleId = newUser.RoleId
             });
         }
         [HttpPost("forgot-password")]
