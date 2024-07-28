@@ -1,15 +1,16 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using System;
 
 namespace Web_DongHo_API.Services
 {
     public interface ITokenService
     {
-        string GenerateToken(string UserName, int RoleId);
+        string GenerateToken(string userName, int roleId);
+        ClaimsPrincipal ValidateToken(string token);
     }
 
     public class TokenService : ITokenService
@@ -21,21 +22,18 @@ namespace Web_DongHo_API.Services
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         }
 
-        public string GenerateToken(string UserName, int RoleId)
+        public string GenerateToken(string userName, int roleId)
         {
-            if (string.IsNullOrEmpty(UserName))
-                throw new ArgumentNullException(nameof(UserName), "UserName cannot be null or empty.");
-            
-            if (string.IsNullOrEmpty(RoleId.ToString()))
-                throw new ArgumentNullException(nameof(RoleId), "Email cannot be null or empty.");
+            if (string.IsNullOrEmpty(userName))
+                throw new ArgumentNullException(nameof(userName), "UserName cannot be null or empty.");
 
             var claims = new[]
             {
                 new Claim(JwtRegisteredClaimNames.Sub, _configuration["Jwt:Subject"] ?? "default_subject"),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
-                new Claim(ClaimTypes.Name, UserName),
-                new Claim(ClaimTypes.Role, RoleId.ToString()),
+                new Claim(ClaimTypes.Name, userName),
+                new Claim(ClaimTypes.Role, roleId.ToString())
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key is not configured.")));
@@ -50,6 +48,40 @@ namespace Web_DongHo_API.Services
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        public ClaimsPrincipal ValidateToken(string token)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key is not configured."));
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = _configuration["Jwt:Issuer"],
+                ValidAudience = _configuration["Jwt:Audience"],
+                IssuerSigningKey = new SymmetricSecurityKey(key)
+            };
+
+            try
+            {
+                var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out var validatedToken);
+
+                // Thêm kiểm tra loại token (JWT)
+                if (validatedToken is JwtSecurityToken jwtToken &&
+                    jwtToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return principal;
+                }
+
+                throw new SecurityTokenException("Invalid token");
+            }
+            catch
+            {
+                return null;
+            }
         }
     }
 }

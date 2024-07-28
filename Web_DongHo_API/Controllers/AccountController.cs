@@ -53,7 +53,10 @@ namespace Web_DongHo_API.Controllers
         public string UserName { get; set; }
         public int RoleId { get; set; }
     }
-
+    public class AutoLoginRequest
+    {
+        public string Token { get; set; }
+    }
     [Route("api/[controller]")]
     [ApiController]
     public class AccountController : ControllerBase
@@ -189,6 +192,26 @@ namespace Web_DongHo_API.Controllers
                 RoleId = newUser.RoleId
             });
         }
+        [HttpPost("auto-login")]
+        public IActionResult AutoLogin([FromBody] AutoLoginRequest request)
+        {
+            var principal = _tokenService.ValidateToken(request.Token);
+            if (principal == null)
+            {
+                return Unauthorized(new ErrorResponse { Message = "Invalid token." });
+            }
+
+            var userName = principal.FindFirst(ClaimTypes.Name)?.Value;
+            var roleId = int.Parse(principal.FindFirst(ClaimTypes.Role)?.Value);
+
+            return Ok(new Login_RegistrationResponse
+            {
+                Token = request.Token,
+                UserName = userName,
+                RoleId = roleId
+            });
+        }
+
         [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
         {
