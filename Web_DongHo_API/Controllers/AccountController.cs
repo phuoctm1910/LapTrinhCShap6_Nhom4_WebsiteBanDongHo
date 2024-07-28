@@ -20,6 +20,8 @@ namespace Web_DongHo_API.Controllers
         public string UserName { get; set; }
         public string Email { get; set; }
         public string Password { get; set; }
+        public int? RoleId { get; set; }
+        
     }
     public class UserRegistrationRequest
     {
@@ -48,67 +50,65 @@ namespace Web_DongHo_API.Controllers
         private readonly ITokenService _tokenService;
         private readonly EmailService _emailService;
         private readonly IWebHostEnvironment _web;
-        private readonly UserManager<User> _userManager;
-        public AccountController(AppDbContext context, ITokenService tokenService, EmailService emailService, IWebHostEnvironment web, UserManager<User> userManager)
+        public AccountController(AppDbContext context, ITokenService tokenService, EmailService emailService, IWebHostEnvironment web)
         {
             _context = context;
             _tokenService = tokenService;
             _emailService = emailService;
             _web = web;
-            _userManager = userManager;
         }
-        [HttpGet("google-login")]
-        public IActionResult GoogleLogin()
-        {
-            var redirectUrl = Url.Action(nameof(GoogleResponse), "Account", null, Request.Scheme);
-            var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
-            return Challenge(properties, GoogleDefaults.AuthenticationScheme);
-        }
+        //[HttpGet("google-login")]
+        //public IActionResult GoogleLogin()
+        //{
+        //    var redirectUrl = Url.Action(nameof(GoogleResponse), "Account", null, Request.Scheme);
+        //    var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
+        //    return Challenge(properties, GoogleDefaults.AuthenticationScheme);
+        //}
 
-        [HttpGet("google-response")]
-        public async Task<IActionResult> GoogleResponse()
-        {
-            var authenticateResult = await HttpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
-            if (!authenticateResult.Succeeded)
-            {
-                return BadRequest("Google authentication failed.");
-            }
+        //[HttpGet("google-response")]
+        //public async Task<IActionResult> GoogleResponse()
+        //{
+        //    var authenticateResult = await HttpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
+        //    if (!authenticateResult.Succeeded)
+        //    {
+        //        return BadRequest("Google authentication failed.");
+        //    }
 
-            var email = authenticateResult.Principal.FindFirstValue(ClaimTypes.Email);
-            var fullName = authenticateResult.Principal.FindFirstValue(ClaimTypes.Name);
+        //    var email = authenticateResult.Principal.FindFirstValue(ClaimTypes.Email);
+        //    var fullName = authenticateResult.Principal.FindFirstValue(ClaimTypes.Name);
 
-            if (email == null)
-            {
-                return BadRequest("Email not found.");
-            }
+        //    if (email == null)
+        //    {
+        //        return BadRequest("Email not found.");
+        //    }
 
-            var user = await _userManager.FindByEmailAsync(email);
+        //    var user = await _userManager.FindByEmailAsync(email);
 
-            if (user == null)
-            {
-                user = new User
-                {
-                    Email = email,
-                    UserName = email,
-                    FullName = fullName,
-                    Password = _userManager.PasswordHasher.HashPassword(user, PasswordHelper.GeneratePassword(12)),
-                    RoleId = 2 
-                };
-                var result = await _userManager.CreateAsync(user);
-                if (!result.Succeeded)
-                {
-                    return BadRequest("Error creating new user.");
-                }
+        //    if (user == null)
+        //    {
+        //        user = new User
+        //        {
+        //            Email = email,
+        //            UserName = email,
+        //            FullName = fullName,
+        //            Password = _userManager.PasswordHasher.HashPassword(user, PasswordHelper.GeneratePassword(12)),
+        //            RoleId = 2 
+        //        };
+        //        var result = await _userManager.CreateAsync(user);
+        //        if (!result.Succeeded)
+        //        {
+        //            return BadRequest("Error creating new user.");
+        //        }
 
-                // Send email with generated password if required
-                // await _emailService.SendEmailAsync(user.Email, "Your new password", $"Your password: {generatedPassword}");
+        //        // Send email with generated password if required
+        //        // await _emailService.SendEmailAsync(user.Email, "Your new password", $"Your password: {generatedPassword}");
 
-            }
+        //    }
 
-            var token = _tokenService.GenerateToken(user);
+        //    var token = _tokenService.GenerateToken(user);
 
-            return Ok(new { token });
-        }
+        //    return Ok(new { token });
+        //}
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] UserLoginRequest request)
         {
@@ -122,10 +122,9 @@ namespace Web_DongHo_API.Controllers
                 .FirstOrDefaultAsync(x =>
                     (x.UserName.Equals(request.UserName) || x.Email.Equals(request.Email))
                     && x.Password.Equals(hashPassBeforeCheck));
-
             if (user != null)
             {
-                var token = _tokenService.GenerateToken(user);
+                var token = _tokenService.GenerateToken(request.UserName, user.RoleId);
 
                 return Ok(new
                 {
@@ -171,14 +170,12 @@ namespace Web_DongHo_API.Controllers
             _context.Users.Add(newUser);
             await _context.SaveChangesAsync();
 
-            var token = _tokenService.GenerateToken(newUser);
+            var token = _tokenService.GenerateToken(newUser.UserName, newUser.RoleId);
 
             return Ok(new
             {
                 token = token,
                 userName = newUser.UserName,
-                email = newUser.Email,
-                fullName = newUser.FullName,
                 roleId = newUser.RoleId
             });
         }

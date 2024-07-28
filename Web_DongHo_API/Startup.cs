@@ -119,6 +119,7 @@ namespace Web_DongHo_API
             });
             services.Configure<SmtpSettings>(Configuration.GetSection("SmtpSettings"));
             services.AddTransient<EmailService>();
+            services.AddScoped<ITokenService, TokenService>();
             services.AddCors(options =>
             {
                 options.AddPolicy("AllowSpecificOrigin",
