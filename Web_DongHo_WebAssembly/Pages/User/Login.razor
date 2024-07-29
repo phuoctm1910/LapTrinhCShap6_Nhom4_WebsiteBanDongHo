@@ -1,6 +1,8 @@
 ﻿@page "/login"
 @using Web_DongHo_WebAssembly.Data
 @inject HttpClient http
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
 @layout EmptyLayout
 <head>
     <style>
@@ -114,7 +116,6 @@
                 width: 100%;
                 left: 0;
             }
-
     </style>
 
 </head>
@@ -124,21 +125,17 @@
 <h1>Đăng nhập</h1>
 <SocialLogin />
 
-<form asp-controller="User" asp-action="Login" method="post">
+<form @onsubmit="HandleLogin">
     <div class="input-group">
-        <label for="UserName">Email hoặc Username:</label>
+        <label for="UserName">Username:</label>
         <div class="input-group mb-3">
-            <input asp-for="UserName" type="text" class="form-control rounded-4" id="UserName" name="UserName" required autocomplete="off">
-            <span asp-validation-for="UserName" class="text-danger"></span>
+            <input @bind="loginModel.UserName" type="text" class="form-control rounded-4" id="UserName" required autocomplete="off">
         </div>
     </div>
     <div class="input-group">
         <label for="password">Mật khẩu:</label>
         <div class="input-group mb-3">
-            <input asp-for="Password" type="password" class="form-control rounded-4" id="Password" name="Password" required autocomplete="off"
-                   pattern="^\S+$"
-                   title="Không được chứa dấu cách">
-            <span asp-validation-for="Password" class="text-danger"></span>
+            <input @bind="loginModel.Password" type="password" class="form-control rounded-4" id="Password" required autocomplete="off">
         </div>
     </div>
     <button class="login" type="submit">Đăng Nhập</button>
@@ -147,5 +144,40 @@
 
 
 @code {
+    private UserLoginRequest loginModel = new UserLoginRequest();
 
+    private async Task HandleLogin()
+    {
+        var response = await http.PostAsJsonAsync("api/account/login", loginModel);
+        if (response.IsSuccessStatusCode)
+        {
+            var result = await response.Content.ReadFromJsonAsync<Login_RegistrationResponse>();
+            if (result != null)
+            {
+                // Store the JWT token in local storage
+                await JS.InvokeVoidAsync("localStorage.setItem", "authToken", result.Token);
+
+                // Navigate to the home page or another protected page
+                Navigation.NavigateTo("/");
+            }
+        }
+        else
+        {
+            // Handle login failure (e.g., show an error message)
+        }
+    }
+    public class UserLoginRequest
+    {
+        public string UserName { get; set; }
+        public string Email { get; set; }
+        public string Password { get; set; }
+        public int? RoleId { get; set; }
+
+    }
+    public class Login_RegistrationResponse
+    {
+        public string Token { get; set; }
+        public string UserName { get; set; }
+        public int RoleId { get; set; }
+    }
 }

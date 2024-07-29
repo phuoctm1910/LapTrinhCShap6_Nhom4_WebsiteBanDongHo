@@ -1,4 +1,7 @@
-﻿<nav class="navbar navbar-expand-lg bg-white border" style="padding: 0!important;">
+﻿@inject NavigationManager Navigation
+@inject IJSRuntime JS
+@using System.IdentityModel.Tokens.Jwt;
+<nav class="navbar navbar-expand-lg bg-white border" style="padding: 0!important;">
     <div class="row container-fluid p-0">
         <a class="navbar-brand col-2 text-center" href="/">
             <img src="images/logo.png" alt="logo" width="100px">
@@ -27,20 +30,32 @@
         </div>
         <div class="col-3 position-relative text-dark">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0 position-absolute text-black" style="left: 90px;top: -20px;">
-                <li class="nav-item dropdown d-flex nav-home">
-                    <a class="nav-link dropdown-toggle text-start" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Tài khoản
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="/register">Đăng ký</a></li>
-                        <li><a class="dropdown-item" href="/login">Đăng nhập</a></li>
-                        <li><a class="dropdown-item" href="/forgot-password">Quên mật khẩu</a></li>
-                        <hr />
-                        <li><a class="dropdown-item" href="/update-info">Đổi thông tin</a></li>
-                        <li><a class="dropdown-item" href="/change-password">Đổi mật khẩu</a></li>
-                        <li><a class="dropdown-item" href="/logout">Đăng xuất</a></li>
-                    </ul>
-                </li>
+                @if (isLoggedIn)
+                {
+                    <li class="nav-item dropdown d-flex nav-home">
+                        <a class="nav-link dropdown-toggle text-start" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            @username
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/update-info">Đổi thông tin</a></li>
+                            <li><a class="dropdown-item" href="/change-password">Đổi mật khẩu</a></li>
+                            <li><a class="dropdown-item" @onclick="Logout">Đăng xuất</a></li>
+                        </ul>
+                    </li>
+                }
+                else
+                {
+                    <li class="nav-item dropdown d-flex nav-home">
+                        <a class="nav-link dropdown-toggle text-start" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Tài khoản
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/register">Đăng ký</a></li>
+                            <li><a class="dropdown-item" href="/login">Đăng nhập</a></li>
+                            <li><a class="dropdown-item" href="/forgot-password">Quên mật khẩu</a></li>
+                        </ul>
+                    </li>
+                }
                 <li class="nav-item">
                     <a class="nav-link text-end position-relative nav-home" role="button" href="/cart">
                         Giỏ hàng
@@ -55,12 +70,33 @@
 </nav>
 
 @code {
-    private bool collapseNavMenu = true;
+    private bool isLoggedIn = false;
+    private string username;
 
-    private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
-
-    private void ToggleNavMenu()
+    protected override async Task OnInitializedAsync()
     {
-        collapseNavMenu = !collapseNavMenu;
+        var token = await JS.InvokeAsync<string>("localStorage.getItem", "authToken");
+
+        if (!string.IsNullOrEmpty(token))
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var decodedToken = handler.ReadJwtToken(token);
+
+            var claims = decodedToken.Claims;
+
+            username = claims.FirstOrDefault(claim => claim.Type == "Name")?.Value;
+
+            isLoggedIn = !string.IsNullOrEmpty(username);
+        }
+    }
+
+    private async Task Logout()
+    {
+        await JS.InvokeVoidAsync("localStorage.removeItem", "authToken");
+
+        isLoggedIn = false;
+
+        Navigation.NavigateTo("/");
     }
 }
+

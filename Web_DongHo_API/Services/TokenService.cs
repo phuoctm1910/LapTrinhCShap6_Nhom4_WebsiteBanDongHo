@@ -32,8 +32,8 @@ namespace Web_DongHo_API.Services
                 new Claim(JwtRegisteredClaimNames.Sub, _configuration["Jwt:Subject"] ?? "default_subject"),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
-                new Claim(ClaimTypes.Name, userName),
-                new Claim(ClaimTypes.Role, roleId.ToString())
+                new Claim("Name", userName),
+                new Claim("Role", roleId.ToString())
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key is not configured.")));

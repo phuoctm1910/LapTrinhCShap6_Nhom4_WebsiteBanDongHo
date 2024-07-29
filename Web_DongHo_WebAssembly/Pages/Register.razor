@@ -101,7 +101,7 @@
             // Thêm mã lưu trữ token và điều hướng đến trang mong muốn
             toastMessage = "Auto-login successful!";
             ShowToast();
-
+            await JS.InvokeVoidAsync("localStorage.setItem", "authToken", loginRequest.Token);
             // Ví dụ điều hướng
             Navigation.NavigateTo("/Home");
         }

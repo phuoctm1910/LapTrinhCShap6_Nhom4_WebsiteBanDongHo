@@ -4,134 +4,133 @@
 @inject NavigationManager Navigation
 
 @layout EmptyLayout
-    <head>
-        <style>
-            body {
-                font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-                margin: 0;
-                padding: 0;
-                background-color: #f4f4f4;
-                background-image: url(../../images/background-login.jpg);
-                background-size: cover;
-                background-position: center;
+<head>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            background-image: url(../../images/background-login.jpg);
+            background-size: cover;
+            background-position: center;
+        }
+
+        .container {
+            width: 700px;
+            margin: 50px auto;
+            background-color: #fff;
+            padding: 30px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 15px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        p {
+            text-align: center;
+            color: #666;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        input[type="date"],
+        input[type="number"],
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button[type="submit"] {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease-in-out;
+        }
+
+            button[type="submit"]:hover {
+                background-color: #555;
+                transform: scale(1.05);
             }
 
-            .container {
-                width: 700px;
-                margin: 50px auto;
-                background-color: #fff;
-                padding: 30px;
-                box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-                border-radius: 15px;
+        .login {
+            background-color: #333;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            transition: background-color 0.3s, transform 0.3s ease-in-out;
+        }
+
+            .login:hover {
+                background-color: #555;
+                transform: scale(1.05);
             }
 
-            h1 {
-                text-align: center;
-                color: #333;
-                margin-bottom: 20px;
-            }
 
-            p {
-                text-align: center;
-                color: #666;
-            }
 
-            .input-group {
-                margin-bottom: 15px;
-            }
 
-            label {
+        .container .backHome {
+            color: #333;
+            text-decoration: none;
+            font-weight: 500;
+            display: inline-block;
+            position: relative;
+        }
+
+            .container .backHome:after {
+                background: none repeat scroll 0 0 transparent;
+                bottom: 0;
+                content: "";
                 display: block;
-                margin-bottom: 5px;
-                color: #333;
+                height: 2px;
+                left: 50%;
+                position: absolute;
+                background: #333;
+                transition: width 0.4s ease 0s, left 0.4s ease 0s;
+                width: 0;
             }
 
-            input[type="date"],
-            input[type="number"],
-            input[type="text"],
-            input[type="email"],
-            input[type="password"] {
+            .container .backHome:hover:after {
                 width: 100%;
-                padding: 10px;
-                border: 1px solid #ccc;
-                border-radius: 4px;
+                left: 0;
             }
+    </style>
 
-            button[type="submit"] {
-                background-color: #333;
-                color: #fff;
-                padding: 10px 20px;
-                border: none;
-                border-radius: 5px;
-                cursor: pointer;
-                transition: background-color 0.3s ease, transform 0.3s ease-in-out;
-            }
-
-                button[type="submit"]:hover {
-                    background-color: #555;
-                    transform: scale(1.05);
-                }
-
-            .login {
-                background-color: #333;
-                color: white;
-                padding: 10px 20px;
-                text-align: center;
-                text-decoration: none;
-                display: inline-block;
-                font-size: 16px;
-                margin: 4px 2px;
-                cursor: pointer;
-                border: none;
-                border-radius: 4px;
-                transition: background-color 0.3s, transform 0.3s ease-in-out;
-            }
-
-                .login:hover {
-                    background-color: #555;
-                    transform: scale(1.05);
-                }
-
-
-
-
-            .container .backHome {
-                color: #333;
-                text-decoration: none;
-                font-weight: 500;
-                display: inline-block;
-                position: relative;
-            }
-
-                .container .backHome:after {
-                    background: none repeat scroll 0 0 transparent;
-                    bottom: 0;
-                    content: "";
-                    display: block;
-                    height: 2px;
-                    left: 50%;
-                    position: absolute;
-                    background: #333;
-                    transition: width 0.4s ease 0s, left 0.4s ease 0s;
-                    width: 0;
-                }
-
-                .container .backHome:hover:after {
-                    width: 100%;
-                    left: 0;
-                }
-
-        </style>
-
-    </head>
+</head>
 
 <div>
     <a class="backHome" style="color:" href="/"> <i class="fa-solid fa-house"></i> Trở về trang chủ</a>
 </div>
 <h1>Đăng ký</h1>
-    <SocialLogin />
+<SocialLogin />
 
-<EditForm Model="@user" OnValidSubmit="@RegisterUser" >
+<EditForm Model="@user" OnValidSubmit="@RegisterUser">
     <DataAnnotationsValidator />
     <ValidationSummary />
 
@@ -182,94 +181,104 @@
     <a class="login" href="/login">Đăng Nhập</a>
 </EditForm>
 
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div class="toast fade" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <strong class="me-auto">Thông báo</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+            @toastMessage
+        </div>
+    </div>
+</div>
 @code {
-    @code {
-        private UserRegistrationRequest user = new UserRegistrationRequest();
-        private string toastMessage = string.Empty;
+    private UserRegistrationRequest user = new UserRegistrationRequest();
+    private string toastMessage = string.Empty;
 
-        // Hàm gửi request đến api
-        private async Task RegisterUser()
+    // Hàm gửi request đến api
+    private async Task RegisterUser()
+    {
+        // Gửi request đến api/resigter cùng với gói dữ liệu user
+        var response = await HttpClient.PostAsJsonAsync<UserRegistrationRequest>("api/Account/register", user);
+        if (response.IsSuccessStatusCode)
         {
-            // Gửi request đến api/resigter cùng với gói dữ liệu user
-            var response = await HttpClient.PostAsJsonAsync<UserRegistrationRequest>("api/Account/register", user);
-            if (response.IsSuccessStatusCode)
-            {
-                var result = await response.Content.ReadFromJsonAsync<RegistrationResponse>();
-                toastMessage = "Registration successful!";
-                ShowToast();
+            var result = await response.Content.ReadFromJsonAsync<RegistrationResponse>();
+            toastMessage = "Registration successful!";
+            ShowToast();
 
-                // Auto-login
-                await AutoLogin(result.Token);
-            }
-            else
-            {
-                var errorResponse = await response.Content.ReadFromJsonAsync<ErrorResponse>();
-                toastMessage = errorResponse?.Message ?? "An unknown error occurred.";
-                ShowToast();
-            }
+            // Auto-login
+            await AutoLogin(result.Token);
         }
-
-        // Thêm vào @toastMessage trên kia
-        private void ShowToast()
+        else
         {
-            // Xem này như 1 javascript
-            JS.InvokeVoidAsync("eval", "var toastElement = document.querySelector('.toast'); var toast = new bootstrap.Toast(toastElement); toast.show();");
-        }
-
-        // Auto-login function
-        private async Task AutoLogin(string token)
-        {
-            var loginRequest = new LoginRequest { Token = token };
-            var response = await HttpClient.PostAsJsonAsync<LoginRequest>("api/Account/auto-login", loginRequest);
-            if (response.IsSuccessStatusCode)
-            {
-                var loginResponse = await response.Content.ReadFromJsonAsync<RegistrationResponse>();
-                // Lưu trữ token và chuyển hướng đến trang chính
-                // Thêm mã lưu trữ token và điều hướng đến trang mong muốn
-                toastMessage = "Auto-login successful!";
-                ShowToast();
-
-                // Ví dụ điều hướng
-                Navigation.NavigateTo("/Home");
-            }
-            else
-            {
-                var errorResponse = await response.Content.ReadFromJsonAsync<ErrorResponse>();
-                toastMessage = errorResponse?.Message ?? "Auto-login failed.";
-                ShowToast();
-            }
-        }
-
-        // Tạo Model để gửi đến api vì chuyển qua xem api thì sẽ thấy nó yêu cầu [FromBody]
-        public class UserRegistrationRequest
-        {
-            public string FullName { get; set; }
-            public bool Gender { get; set; }
-            public string PhoneNumber { get; set; }
-            public string UserName { get; set; }
-            public string Password { get; set; }
-            public DateTime BirthDate { get; set; }
-        }
-
-        // Model tình trạng Đăng ký
-        public class RegistrationResponse
-        {
-            public string Token { get; set; }
-            public string UserName { get; set; }
-            public int RoleId { get; set; }
-        }
-
-        // Model thông báo lỗi
-        public class ErrorResponse
-        {
-            public string Message { get; set; }
-        }
-
-        // Model yêu cầu đăng nhập
-        public class LoginRequest
-        {
-            public string Token { get; set; }
+            var errorResponse = await response.Content.ReadFromJsonAsync<ErrorResponse>();
+            toastMessage = errorResponse?.Message ?? "An unknown error occurred.";
+            ShowToast();
         }
     }
 
+    // Thêm vào @toastMessage trên kia
+    private void ShowToast()
+    {
+        // Xem này như 1 javascript
+        JS.InvokeVoidAsync("eval", "var toastElement = document.querySelector('.toast'); var toast = new bootstrap.Toast(toastElement); toast.show();");
+    }
+
+    // Auto-login function
+    private async Task AutoLogin(string token)
+    {
+        var loginRequest = new LoginRequest { Token = token };
+        var response = await HttpClient.PostAsJsonAsync<LoginRequest>("api/Account/auto-login", loginRequest);
+        if (response.IsSuccessStatusCode)
+        {
+            var loginResponse = await response.Content.ReadFromJsonAsync<RegistrationResponse>();
+            // Lưu trữ token và chuyển hướng đến trang chính
+            // Thêm mã lưu trữ token và điều hướng đến trang mong muốn
+            toastMessage = "Auto-login successful!";
+            ShowToast();
+            await JS.InvokeVoidAsync("localStorage.setItem", "authToken", loginRequest.Token);
+            // Ví dụ điều hướng
+            Navigation.NavigateTo("/Home");
+        }
+        else
+        {
+            var errorResponse = await response.Content.ReadFromJsonAsync<ErrorResponse>();
+            toastMessage = errorResponse?.Message ?? "Auto-login failed.";
+            ShowToast();
+        }
+    }
+
+    // Tạo Model để gửi đến api vì chuyển qua xem api thì sẽ thấy nó yêu cầu [FromBody]
+    public class UserRegistrationRequest
+    {
+        public string FullName { get; set; }
+        public bool Gender { get; set; }
+        public string PhoneNumber { get; set; }
+        public string UserName { get; set; }
+        public string Password { get; set; }
+        public DateTime BirthDate { get; set; }
+    }
+
+    // Model tình trạng Đăng ký
+    public class RegistrationResponse
+    {
+        public string Token { get; set; }
+        public string UserName { get; set; }
+        public int RoleId { get; set; }
+    }
+
+    // Model thông báo lỗi
+    public class ErrorResponse
+    {
+        public string Message { get; set; }
+    }
+
+    // Model yêu cầu đăng nhập
+    public class LoginRequest
+    {
+        public string Token { get; set; }
+    }
 }
+
+

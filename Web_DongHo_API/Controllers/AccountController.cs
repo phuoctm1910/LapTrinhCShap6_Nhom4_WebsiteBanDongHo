@@ -201,8 +201,8 @@ namespace Web_DongHo_API.Controllers
                 return Unauthorized(new ErrorResponse { Message = "Invalid token." });
             }
 
-            var userName = principal.FindFirst(ClaimTypes.Name)?.Value;
-            var roleId = int.Parse(principal.FindFirst(ClaimTypes.Role)?.Value);
+            var userName = principal.FindFirst(c => c.Type == "Name")?.Value;
+            var roleId = int.Parse(principal.FindFirst(c => c.Type == "Role")?.Value);
 
             return Ok(new Login_RegistrationResponse
             {
