@@ -7,7 +7,7 @@
         public int ProductId { get; set; }
         public int Quantity { get; set; }
         public float UnitPrice { get; set; }
-        public float TotalPrice { get; set; }
+        public decimal TotalPrice { get; set; }
         public virtual Bill Bill { get; set; }
         public virtual Product Product { get; set; }
     }
