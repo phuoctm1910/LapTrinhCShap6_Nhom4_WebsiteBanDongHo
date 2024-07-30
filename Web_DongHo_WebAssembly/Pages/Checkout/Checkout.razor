@@ -1,0 +1,140 @@
+﻿@page "/thanhtoan"
+@using Web_DongHo_WebAssembly.Data
+@using Web_DongHo_WebAssembly.Models
+@inject HttpClient Http
+
+<div class="container mt-5">
+    <h2>Thanh Toán</h2>
+    <div class="row">
+        <div class="col-md-8">
+            <form asp-action="CompletePurchase" method="post" id="checkout-form">
+                <div class="mb-3">
+                    <label for="fullName" class="form-label">Họ và Tên:</label>
+                    <input type="text" class="form-control" id="fullName" name="fullName" required
+                           pattern="[a-zA-Z ]+"
+                           title="Chỉ được nhập chữ cái và dấu cách">
+                </div>
+                <div class="mb-3">
+                    <label for="phone" class="form-label">Số điện thoại:</label>
+                    <input type="text" class="form-control" id="phone" name="phone" required
+                           pattern="^(03|05|07|08|09)[0-9]{8}$"
+                           title="Số điện thoại phải bắt đầu bằng mã quốc gia của Việt Nam và có tổng cộng 10 chữ số">
+                </div>
+                <div class="mb-3">
+                    <label for="address" class="form-label">Địa chỉ nhận hàng:</label>
+                    <input type="text" class="form-control" id="address" name="address" required
+                           pattern="^[a-zA-Z0-9\s,'-]*$"
+                           title="Địa chỉ chỉ được chứa các ký tự chữ cái, số, dấu cách và các ký tự đặc biệt: , ' -">
+                </div>
+                <div class="mb-3">
+                    <label for="paymentMethod" class="form-label">Phương thức thanh toán:</label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="paymentMethod" id="cash" value="Cash" checked>
+                        <label class="form-check-label" for="cash">
+                            Tiền Mặt
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="paymentMethod" id="paypal" value="Paypal">
+                        <label class="form-check-label" for="paypal">
+                            Paypal
+                        </label>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" id="complete">Hoàn thành đặt hàng</button>
+            </form>
+        </div>
+        <div class="col-md-4">
+            <div class="row">
+                <h4>Giỏ hàng của bạn<span class="badge bg-primary ">@totalQuantity</span></h4>
+            </div>
+            <ul class="list-group my-4">
+                @foreach (var item in BillDetails)
+                {
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div class="row">
+                            <div>
+                                <h6>@item.Product.ProductName</h6>
+                                <small>@item.Quantity x @item.UnitPrice.ToString("#,##0").Replace(",", ".") ₫</small>
+                            </div>
+                            <span>@item.TotalPrice.ToString("#,##0").Replace(",", ".") ₫</span>
+                        </div>
+                    </li>
+                }
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    @if (TotalAmount - totalAllUnit == 15000)
+                    {
+                        <p>Vận chuyển</p>
+                        <p>
+                            Vận chuyển chậm - <span id="deli-slow">15.000 ₫</span>
+                        </p>
+                    }
+                    else
+                    {
+                        <p>Vận chuyển</p>
+                        <p>
+                            Vận chuyển nhanh - <span id="deli-fast">25.000 ₫</span>
+                        </p>
+                    }
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>Total (VND)</span>
+                    <strong>@TotalAmount.ToString("#,##0").Replace(",", ".") ₫</strong>
+                </li>
+            </ul>
+            <div id="paypal-container">
+                <div id="paypal-button-container"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<BillDetails> BillDetails = new List<BillDetails>();
+    private int totalQuantity;
+    private decimal totalAllUnit;
+    private decimal TotalAmount;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Initialize your data here, e.g., load from API
+        BillDetails = await LoadBillDetails();
+        totalQuantity = BillDetails.Sum(item => item.Quantity);
+        totalAllUnit = BillDetails.Sum(item => item.TotalPrice);
+        TotalAmount = totalAllUnit + CalculateShipping();
+    }
+
+    private async Task<List<BillDetails>> LoadBillDetails()
+    {
+        // Replace with actual data fetching logic
+        return new List<BillDetails>
+        {
+            new BillDetails { Product = new Product { ProductName = "Product 1" }, Quantity = 1, UnitPrice = 100000, TotalPrice = 100000 },
+            new BillDetails { Product = new Product { ProductName = "Product 2" }, Quantity = 2, UnitPrice = 200000, TotalPrice = 400000 }
+        };
+    }
+
+    private decimal CalculateShipping()
+    {
+        return 15000; // Replace with actual logic to calculate shipping
+    }
+}
+<style>
+    .container {
+        max-width: 1200px;
+    }
+
+    .cart-summary {
+        background-color: #f9f9f9;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #004085;
+        }
+</style>
