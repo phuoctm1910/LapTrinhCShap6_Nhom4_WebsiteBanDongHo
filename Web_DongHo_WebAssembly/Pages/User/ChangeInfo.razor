@@ -1,0 +1,260 @@
+﻿@page "/update-info"
+@using Web_DongHo_WebAssembly.Data
+@inject HttpClient http
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+@layout EmptyLayout
+
+<head>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            background-image: url(../../images/background-login.jpg);
+            background-size: cover;
+            background-position: center;
+        }
+
+        .container {
+            width: 700px;
+            margin: 50px auto;
+            background-color: #fff;
+            padding: 30px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 15px;
+            background-color: white; /* Ensure the form background is white */
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        p {
+            text-align: center;
+            color: #666;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        input {
+            width: 500px !important;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        input[type="date"],
+        input[type="number"],
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button[type="submit"] {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease-in-out;
+        }
+
+            button[type="submit"]:hover {
+                background-color: #555;
+                transform: scale(1.05);
+            }
+
+        .login {
+            background-color: #333;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            transition: background-color 0.3s, transform 0.3s ease-in-out;
+        }
+
+            .login:hover {
+                background-color: #555;
+                transform: scale(1.05);
+            }
+
+        .input-group > .form-control {
+            flex: none;
+            float: right;
+        }
+
+        .container .backHome {
+            color: #333;
+            text-decoration: none;
+            font-weight: 500;
+            display: inline-block;
+            position: relative;
+        }
+
+            .container .backHome:after {
+                background: none repeat scroll 0 0 transparent;
+                bottom: 0;
+                content: "";
+                display: block;
+                height: 2px;
+                left: 50%;
+                position: absolute;
+                background: #333;
+                transition: width 0.4s ease 0s, left 0.4s ease 0s;
+                width: 0;
+            }
+
+            .container .backHome:hover:after {
+                width: 100%;
+                left: 0;
+            }
+
+        form {
+            padding: 60px;
+        }
+
+        .gender-group {
+            display: flex;
+        }
+
+        .gender {
+            height: 20px;
+            width: 30px !important;
+            margin-left: 30px;
+        }
+    </style>
+</head>
+
+<div>
+    <div>
+        <a class="backHome" href="/"> <i class="fa-solid fa-house"></i> Trở về trang chủ</a>
+    </div>
+    <h1>Thay Đổi Thông Tin</h1>
+
+    <form @onsubmit="HandleSubmit">
+        <div class="input-group">
+            <label for="UserName">Tài Khoản:</label>
+            <input @bind="User.UserName" type="text" class="form-control rounded-4" id="UserName" required readonly />
+        </div>
+        <div class="input-group">
+            <label for="FullName">Họ và Tên:</label>
+            <input @bind="User.FullName" type="text" class="form-control" required pattern="[A-Za-zÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂÂÊÔưăâêô\s]+" title="Chỉ được điền tên tiếng Việt và dấu cách" />
+        </div>
+        <div class="input-group">
+            <label for="PhoneNumber">Số điện thoại:</label>
+
+            <input @bind="User.PhoneNumber" type="text" class="form-control rounded-4" id="PhoneNumber" required />
+        </div>
+        <div class="input-group">
+            <label>Giới tính:</label>
+            <div class="gender-group">
+                <input type="radio" id="male" class="gender" name="gender" value="true" @onchange="() => User.Gender = true" checked="@User.Gender" />
+                <label for="male">Nam</label>
+                <input type="radio" id="female" class="gender" name="gender" value="false" @onchange="() => User.Gender = false" checked="!@User.Gender" />
+                <label for="female">Nữ</label>
+            </div>
+        </div>
+        <div class="input-group">
+            <label for="BirthDate">Năm Sinh:</label>
+            <input @bind="User.BirthDate" type="date" class="form-control rounded-4" id="BirthDate" required />
+        </div>
+
+        <button type="submit">Lưu thông tin</button>
+    </form>
+
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div class="toast fade" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <strong class="me-auto">Thông báo</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                @toastMessage
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private ChangeInfoRequest User = new ChangeInfoRequest();
+    private string toastMessage = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var token = await JS.InvokeAsync<string>("localStorage.getItem", "authToken");
+
+        if (!string.IsNullOrEmpty(token))
+        {
+            var response = await http.GetAsync("api/Account/GetUserInfo");
+            if (response.IsSuccessStatusCode)
+            {
+                User = await response.Content.ReadFromJsonAsync<ChangeInfoRequest>();
+            }
+            else
+            {
+                toastMessage = "Không thể tải thông tin người dùng.";
+                ShowToast();
+            }
+        }
+        else
+        {
+            Navigation.NavigateTo("/login");
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        var response = await http.PostAsJsonAsync("api/Account/change-info", User);
+        if (response.IsSuccessStatusCode)
+        {
+            toastMessage = "Thông tin đã được cập nhật thành công!";
+            ShowToast();
+        }
+        else
+        {
+            var errorResponse = await response.Content.ReadFromJsonAsync<ErrorResponse>();
+            toastMessage = errorResponse?.Message ?? "Đã xảy ra lỗi khi cập nhật thông tin.";
+            ShowToast();
+        }
+    }
+
+    private void ShowToast()
+    {
+        JS.InvokeVoidAsync("eval", "var toastElement = document.querySelector('.toast'); var toast = new bootstrap.Toast(toastElement); toast.show();");
+    }
+
+    public class ChangeInfoRequest
+    {
+        public string FullName { get; set; }
+        public bool Gender { get; set; }
+        public string PhoneNumber { get; set; }
+        public string UserName { get; set; }
+        public string Password { get; set; }
+        public DateTime BirthDate { get; set; }
+    }
+
+    public class ErrorResponse
+    {
+        public string Message { get; set; }
+    }
+}
