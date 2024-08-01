@@ -32,6 +32,15 @@ namespace Web_DongHo_API.Controllers
         public string Password { get; set; }
         public DateTime BirthDate { get; set; }
     }
+    public class ChangeInfoRequest
+    {
+        public string FullName { get; set; }
+        public bool Gender { get; set; }
+        public string PhoneNumber { get; set; }
+        public string UserName { get; set; }
+        public string Password { get; set; }
+        public DateTime BirthDate { get; set; }
+    }
     public class ForgotPasswordRequest
     {
         public string Email { get; set; }
@@ -235,8 +244,11 @@ namespace Web_DongHo_API.Controllers
 
             return Ok(new { message = "Mật khẩu mới đã được gửi qua email." });
         }
+
+        [HttpGet("GetUserInfo")]
+
         [HttpPost("change-info")]
-        public async Task<IActionResult> ChangeInfo([FromForm] User user, IFormFile file)
+        public async Task<IActionResult> ChangeInfo([FromBody] ChangeInfoRequest user)
         {
             if (user == null || !ModelState.IsValid)
             {
@@ -251,31 +263,31 @@ namespace Web_DongHo_API.Controllers
 
             userToUpdate.FullName = user.FullName;
             userToUpdate.PhoneNumber = user.PhoneNumber;
-            userToUpdate.Email = user.Email;
             userToUpdate.Gender = user.Gender;
             userToUpdate.BirthDate = user.BirthDate;
 
-            if (file != null && file.Length > 0)
-            {
-                var fileName = Path.GetFileName(file.FileName);
-                var filePath = Path.Combine(_web.WebRootPath, "uploads", fileName);
+            //if (file != null && file.Length > 0)
+            //{
+            //    var fileName = Path.GetFileName(file.FileName);
+            //    var filePath = Path.Combine(_web.WebRootPath, "uploads", fileName);
 
-                if (!System.IO.File.Exists(filePath))
-                {
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await file.CopyToAsync(stream);
-                    }
-                }
+            //    if (!System.IO.File.Exists(filePath))
+            //    {
+            //        using (var stream = new FileStream(filePath, FileMode.Create))
+            //        {
+            //            await file.CopyToAsync(stream);
+            //        }
+            //    }
 
-                userToUpdate.Image = fileName;
-            }
+            //    userToUpdate.Image = fileName;
+            //}
 
             _context.Users.Update(userToUpdate);
             await _context.SaveChangesAsync();
 
             return Ok(new { message = "User information updated successfully." });
         }
+
         [HttpPost("change-password")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
         {
