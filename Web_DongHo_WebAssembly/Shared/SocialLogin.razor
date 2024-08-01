@@ -1,6 +1,8 @@
-﻿
+﻿@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
 <div class="social-login">
-    <a href="/user/googlelogin" class="link">
+    <a @onclick="LoginWithGoogle" class="link">
         <img src="https://i.pinimg.com/originals/84/c7/00/84c7007eb6ac4374f77394d1e4954a96.png" alt="">
         <h6>Google</h6>
     </a>
@@ -14,6 +16,34 @@
     </a>
 </div>
 
-@code {
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">
+        @errorMessage
+    </div>
+}
 
+@code {
+    private string errorMessage;
+
+    private async Task LoginWithGoogle()
+    {
+        try
+        {
+            var url = "https://localhost:44355/api/Account/google-login";
+            Navigation.NavigateTo(url, true);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"An error occurred: {ex.Message}";
+            Console.WriteLine(errorMessage);
+            await JS.InvokeVoidAsync("alert", errorMessage);
+        }
+    }
+
+    private async void OnLoginSuccess()
+    {
+       
+        Navigation.NavigateTo("/"); 
+    }
 }

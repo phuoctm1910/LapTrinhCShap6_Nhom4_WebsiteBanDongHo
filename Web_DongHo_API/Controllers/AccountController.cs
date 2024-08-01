@@ -12,6 +12,8 @@ using System.Threading.Tasks;
 using Web_DongHo_API.Data;
 using Web_DongHo_API.Models;
 using Web_DongHo_API.Services;
+using Org.BouncyCastle.Asn1.Ocsp;
+using System.Linq;
 
 namespace Web_DongHo_API.Controllers
 {
@@ -21,7 +23,7 @@ namespace Web_DongHo_API.Controllers
         public string Email { get; set; }
         public string Password { get; set; }
         public int? RoleId { get; set; }
-        
+
     }
     public class UserRegistrationRequest
     {
@@ -72,58 +74,63 @@ namespace Web_DongHo_API.Controllers
             _emailService = emailService;
             _web = web;
         }
-        //[HttpGet("google-login")]
-        //public IActionResult GoogleLogin()
-        //{
-        //    var redirectUrl = Url.Action(nameof(GoogleResponse), "Account", null, Request.Scheme);
-        //    var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
-        //    return Challenge(properties, GoogleDefaults.AuthenticationScheme);
-        //}
+        [HttpGet("google-login")]
+        public IActionResult GoogleLogin()
+        {
+            var redirectUrl = Url.Action("GoogleResponse", "Account", null, Request.Scheme);
+            var properties = new AuthenticationProperties
+            {
+                RedirectUri = redirectUrl,
+                AllowRefresh = true
+            };
+            return Challenge(properties, GoogleDefaults.AuthenticationScheme);
+        }
 
-        //[HttpGet("google-response")]
-        //public async Task<IActionResult> GoogleResponse()
-        //{
-        //    var authenticateResult = await HttpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
-        //    if (!authenticateResult.Succeeded)
-        //    {
-        //        return BadRequest("Google authentication failed.");
-        //    }
+        [HttpGet]
+        public async Task<IActionResult> GoogleResponse()
+        {
+            var authenticateResult = await HttpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
+            if (!authenticateResult.Succeeded)
+            {
+                return BadRequest("Google authentication failed.");
+            }
 
-        //    var email = authenticateResult.Principal.FindFirstValue(ClaimTypes.Email);
-        //    var fullName = authenticateResult.Principal.FindFirstValue(ClaimTypes.Name);
+            var claims = authenticateResult.Principal.Identities.FirstOrDefault()?.Claims.Select(claim => new
+            {
+                claim.Type,
+                claim.Value
+            }).ToList();
 
-        //    if (email == null)
-        //    {
-        //        return BadRequest("Email not found.");
-        //    }
+            var email = claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            var fullName = claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
 
-        //    var user = await _userManager.FindByEmailAsync(email);
+            if (email == null)
+            {
+                return BadRequest("Email not found.");
+            }
 
-        //    if (user == null)
-        //    {
-        //        user = new User
-        //        {
-        //            Email = email,
-        //            UserName = email,
-        //            FullName = fullName,
-        //            Password = _userManager.PasswordHasher.HashPassword(user, PasswordHelper.GeneratePassword(12)),
-        //            RoleId = 2 
-        //        };
-        //        var result = await _userManager.CreateAsync(user);
-        //        if (!result.Succeeded)
-        //        {
-        //            return BadRequest("Error creating new user.");
-        //        }
+            var user = _context.Users.FirstOrDefault(u => u.Email == email);
+            if (user == null)
+            {
+                var newUser = new User
+                {
+                    Email = email,
+                    UserName = email,
+                    FullName = fullName,
+                    Password = PasswordHelper.GetMd5Hash(PasswordHelper.GeneratePassword(6)),
+                    RoleId = 2
+                };
+                await _context.Users.AddAsync(newUser);
+                await _context.SaveChangesAsync();
+                user = newUser;
+            }
 
-        //        // Send email with generated password if required
-        //        // await _emailService.SendEmailAsync(user.Email, "Your new password", $"Your password: {generatedPassword}");
+            var token = _tokenService.GenerateToken(user.UserName, user.RoleId);
 
-        //    }
+            var redirectUrl = $"https://localhost:44395/authentication?token={token}";
+            return Redirect(redirectUrl);
+        }
 
-        //    var token = _tokenService.GenerateToken(user);
-
-        //    return Ok(new { token });
-        //}
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] UserLoginRequest request)
         {
@@ -164,7 +171,7 @@ namespace Web_DongHo_API.Controllers
 
             if (existingUser)
             {
-                return Conflict(new ErrorResponse {  Message = "Username or email already exists." });
+                return Conflict(new ErrorResponse { Message = "Username or email already exists." });
             }
 
             var hashedPassword = PasswordHelper.GetMd5Hash(request.Password);
@@ -284,7 +291,7 @@ namespace Web_DongHo_API.Controllers
                 return BadRequest(new { success = false, message = "Mật khẩu mới và xác nhận mật khẩu không khớp." });
             }
 
-            var userName = HttpContext.User.Identity.Name; 
+            var userName = HttpContext.User.Identity.Name;
             if (string.IsNullOrEmpty(userName))
             {
                 return Unauthorized(new { success = false, message = "Người dùng chưa đăng nhập." });

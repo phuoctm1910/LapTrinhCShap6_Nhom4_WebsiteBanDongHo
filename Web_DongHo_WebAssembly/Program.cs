@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Web_DongHo_WebAssembly.Models;
 
 namespace Web_DongHo_WebAssembly
 {
@@ -22,6 +23,7 @@ namespace Web_DongHo_WebAssembly
             builder.RootComponents.Add<Web_DongHo_WebAssembly.App>("#app");
 
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:44355/") });
+            builder.Services.AddSingleton<AuthState>();
 
             await DebugDelayAsync();
             await builder.Build().RunAsync();

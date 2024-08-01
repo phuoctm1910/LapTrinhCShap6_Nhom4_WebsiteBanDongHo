@@ -36,25 +36,54 @@ namespace Web_DongHo_API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAllOrigins", builder =>
+                {
+                    builder.WithOrigins("https://localhost:44395") 
+                           .AllowAnyMethod()
+                           .AllowAnyHeader()
+                           .AllowCredentials();
+                });
+            });
+
+            var key = Encoding.UTF8.GetBytes(Configuration["Jwt:Key"]);
+
             services.AddAuthentication(options =>
             {
                 options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
-            }).AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
+            })
+            .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
             {
                 options.Cookie.SameSite = SameSiteMode.None;
                 options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-            }).AddGoogle(GoogleDefaults.AuthenticationScheme, options =>
+            })
+            .AddGoogle(GoogleDefaults.AuthenticationScheme, options =>
             {
                 IConfigurationSection googleAuthNSection = Configuration.GetSection("Authentication:Google");
                 options.ClientId = googleAuthNSection["ClientId"];
                 options.ClientSecret = googleAuthNSection["ClientSecret"];
-                options.CallbackPath = "/signin-google";
                 options.Scope.Add("email");
                 options.Scope.Add("profile");
+                options.CallbackPath = "/signin-google";
                 options.SaveTokens = true;
+            })
+            .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = Configuration["Jwt:Issuer"],
+                    ValidAudience = Configuration["Jwt:Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(key)
+                };
             });
+
             services.AddDbContext<AppDbContext>(options =>
             {
                 options.UseSqlServer(Configuration.GetConnectionString("DBConnection"), sqlOptions =>
@@ -62,74 +91,43 @@ namespace Web_DongHo_API
                     sqlOptions.CommandTimeout(180);
                 });
             });
+
             services.AddControllers();
-            // Lấy khóa bí mật từ cấu hình và chuyển đổi nó thành mảng byte để sử dụng trong xác thực JWT.
-            var key = Encoding.UTF8.GetBytes(Configuration["Jwt:Key"]);
 
-
-            // Cấu hình dịch vụ xác thực JWT trong ASP.NET Core
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
-                {
-                    // Cấu hình các tham số xác thực token JWT
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-                        ValidIssuer = Configuration["Jwt:Issuer"],
-                        ValidAudience = Configuration["Jwt:Audience"],
-                        IssuerSigningKey = new SymmetricSecurityKey(key)
-                    };
-                });
-
-            // Sử dụng Swagger với JWT Bearer Token bảo mật
             services.AddSwaggerGen(c =>
             {
-                // Định nghĩa tài liệu Swagger với tiêu đề "JWT" và phiên bản "v1"
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Web_DongHo_API", Version = "v1" });
 
-                // Cấu hình bảo mật JWT Bearer Token
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
                     Description = "JWT Authorization header using the Bearer scheme. " +
-                      "Example: \"Authorization: Bearer {token}\"",
+                                  "Example: \"Authorization: Bearer {token}\"",
                     Name = "Authorization",
                     In = ParameterLocation.Header,
                     Type = SecuritySchemeType.ApiKey,
                     Scheme = "Bearer"
                 });
 
-                // Yêu cầu bảo mật cho toàn bộ API
                 c.AddSecurityRequirement(new OpenApiSecurityRequirement
+        {
+            {
+                new OpenApiSecurityScheme
                 {
+                    Reference = new OpenApiReference
                     {
-                        new OpenApiSecurityScheme
-                        {
-                            Reference = new OpenApiReference
-                            {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer"
-                            }
-                        },
-                        new string[] {}
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer"
                     }
-                });
+                },
+                new string[] {}
+            }
+        });
             });
+
+            // Other services
             services.Configure<SmtpSettings>(Configuration.GetSection("SmtpSettings"));
             services.AddTransient<EmailService>();
             services.AddScoped<ITokenService, TokenService>();
-            services.AddCors(options =>
-            {
-                options.AddPolicy("AllowSpecificOrigin",
-                    builder =>
-                    {
-                        builder.WithOrigins("https://localhost:44395")
-                               .AllowAnyHeader()
-                               .AllowAnyMethod();
-                    });
-            });
             services.AddHttpClient();
         }
 
@@ -142,20 +140,28 @@ namespace Web_DongHo_API
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Web_DongHo_API v1"));
             }
+            else
+            {
+                app.UseExceptionHandler("/Home/Error");
+                app.UseHsts();
+            }
+
+
 
             app.UseHttpsRedirection();
-
+            app.UseStaticFiles();
             app.UseRouting();
+            app.UseCors("AllowAllOrigins");
 
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.UseCors("AllowSpecificOrigin");
-
             app.UseEndpoints(endpoints =>
             {
+
                 endpoints.MapControllers();
             });
         }
+
     }
 }

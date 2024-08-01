@@ -43,7 +43,7 @@ namespace Web_DongHo_API.Services
                 _configuration["Jwt:Issuer"],
                 _configuration["Jwt:Audience"],
                 claims,
-                expires: DateTime.UtcNow.AddDays(1),
+                expires: DateTime.UtcNow.AddMinutes(10),
                 signingCredentials: creds
             );
 

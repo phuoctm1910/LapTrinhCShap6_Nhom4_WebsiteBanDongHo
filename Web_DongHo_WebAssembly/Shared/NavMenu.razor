@@ -1,5 +1,6 @@
 ﻿@inject NavigationManager Navigation
 @inject IJSRuntime JS
+@inject AuthState AuthState
 @using System.IdentityModel.Tokens.Jwt;
 <nav class="navbar navbar-expand-lg bg-white border" style="padding: 0!important;">
     <div class="row container-fluid p-0">
@@ -30,11 +31,11 @@
         </div>
         <div class="col-3 position-relative text-dark">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0 position-absolute text-black" style="left: 90px;top: -20px;">
-                @if (isLoggedIn)
+                @if (@AuthState.IsLoggedIn)
                 {
                     <li class="nav-item dropdown d-flex nav-home">
                         <a class="nav-link dropdown-toggle text-start" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            @username
+                            @AuthState.Username
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="/update-info">Đổi thông tin</a></li>
@@ -70,33 +71,21 @@
 </nav>
 
 @code {
-    private bool isLoggedIn = false;
-    private string username;
-
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        var token = await JS.InvokeAsync<string>("localStorage.getItem", "authToken");
-
-        if (!string.IsNullOrEmpty(token))
-        {
-            var handler = new JwtSecurityTokenHandler();
-            var decodedToken = handler.ReadJwtToken(token);
-
-            var claims = decodedToken.Claims;
-
-            username = claims.FirstOrDefault(claim => claim.Type == "Name")?.Value;
-
-            isLoggedIn = !string.IsNullOrEmpty(username);
-        }
+        AuthState.OnChange += StateHasChanged;
     }
 
-    private async Task Logout()
+    private void Logout()
     {
-        await JS.InvokeVoidAsync("localStorage.removeItem", "authToken");
-
-        isLoggedIn = false;
-
+        AuthState.IsLoggedIn = false;
+        AuthState.Username = null;
         Navigation.NavigateTo("/");
+    }
+
+    public void Dispose()
+    {
+        AuthState.OnChange -= StateHasChanged;
     }
 }
 
