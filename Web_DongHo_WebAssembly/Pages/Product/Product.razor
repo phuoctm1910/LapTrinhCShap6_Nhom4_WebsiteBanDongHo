@@ -365,7 +365,7 @@
                     <div>
                         <div class="card">
                             <div class="imgBox">
-                                <a class="card-link" href="productdetail/@item.ProductId">
+                                <a class="card-link" href="ProductDetail/@item.ProductId">
                                     @if (true)
                                     {
                                         <img src="images/Product/@item.ProductImages" width="280px" height="300px" alt="@item.ProductName" class="watch">
@@ -398,24 +398,24 @@
 </div>
 
 @code {
-    private List<Web_DongHo_WebAssembly.Data.Product> products;
+        private List<Web_DongHo_WebAssembly.Data.Product> products;
 
-    protected override async Task OnInitializedAsync()
-    {
-        try
+        protected override async Task OnInitializedAsync()
         {
-            var response = await Http.GetStringAsync("api/product");
-            products = JsonConvert.DeserializeObject<List<Web_DongHo_WebAssembly.Data.Product>>(response);
-
-            if (products == null)
+            try
             {
-                Console.WriteLine("No products found.");
+                var response = await Http.GetStringAsync("api/product");
+                products = JsonConvert.DeserializeObject<List<Web_DongHo_WebAssembly.Data.Product>>(response);
+
+                if (products == null)
+                {
+                    Console.WriteLine("No products found.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching products: {ex.Message}");
             }
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error fetching products: {ex.Message}");
-        }
-    }
 }
 
