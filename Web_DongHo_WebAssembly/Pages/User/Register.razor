@@ -23,6 +23,7 @@
             padding: 30px;
             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
             border-radius: 15px;
+            background-color: white; /* Ensure the form background is white */
         }
 
         h1 {
@@ -38,6 +39,10 @@
 
         .input-group {
             margin-bottom: 15px;
+        }
+
+        input {
+            width: 500px !important;
         }
 
         label {
@@ -92,8 +97,10 @@
                 transform: scale(1.05);
             }
 
-
-
+        .input-group > .form-control {
+            flex: none;
+            float: right;
+        }
 
         .container .backHome {
             color: #333;
@@ -120,78 +127,89 @@
                 width: 100%;
                 left: 0;
             }
-    </style>
 
+        form {
+            padding: 60px;
+        }
+
+        .gender-group {
+            display: flex;
+        }
+
+        .gender {
+            height: 20px;
+            width: 30px !important;
+            margin-left: 30px;
+        }
+    </style>
 </head>
 
-<div>
-    <a class="backHome" style="color:" href="/"> <i class="fa-solid fa-house"></i> Trở về trang chủ</a>
-</div>
-<h1>Đăng ký</h1>
-<SocialLogin />
-
-<EditForm Model="@user" OnValidSubmit="@RegisterUser">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
-
-    <div class="input-group">
-        <label for="fullName">Họ và Tên:</label>
-        <InputText id="fullName" class="form-control rounded-4" @bind-Value="user.FullName" required pattern="^[a-zA-Z\s]+$" title="Chỉ được nhập các ký tự chữ cái và dấu cách" />
-        <ValidationMessage For="@(() => user.FullName)" />
-    </div>
-
-    <div class="input-group">
-        <label>Gender</label>
+<body>
+   <div class="bg-white">
         <div>
-            <input type="radio" id="male" name="gender" value="true" @onchange="() => user.Gender = true" checked="@user.Gender" />
-            <label for="male">Male</label>
+            <a class="backHome" href="/"> <i class="fa-solid fa-house"></i> Trở về trang chủ</a>
         </div>
-        <div>
-            <input type="radio" id="female" name="gender" value="false" @onchange="() => user.Gender = false" checked="!@user.Gender" />
-            <label for="female">Female</label>
+        <h1>Đăng ký</h1>
+        <SocialLogin />
+
+        <EditForm Model="@user" OnValidSubmit="@RegisterUser" class="justify-content-between">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            <label for="fullName">Họ và Tên:</label>
+            <div class="input-group">
+                <input id="fullName" class="form-control rounded-4" @bind="user.FullName" required pattern="^[a-zA-Z\s]+$" title="Chỉ được nhập các ký tự chữ cái và dấu cách" />
+                <ValidationMessage For="@(() => user.FullName)" />
+            </div>
+
+            <div class="input-group">
+                <label>Giới tính:</label>
+                <div class="gender-group">
+                    <input type="radio" id="male" class="gender" name="gender" value="true" @onchange="() => user.Gender = true" checked="@user.Gender" />
+                    <label for="male">Nam</label>
+                    <input type="radio" id="female" class="gender" name="gender" value="false" @onchange="() => user.Gender = false" checked="!@user.Gender" />
+                    <label for="female">Nữ</label>
+                </div>
+            </div>
+            <label for="phone">Số điện thoại:</label>
+            <div class="input-group">
+                <input id="phone" class="form-control rounded-4" @bind="user.PhoneNumber" required pattern="^(03|05|07|08|09)[0-9]{8}$" />
+                <ValidationMessage For="@(() => user.PhoneNumber)" />
+            </div>
+            <label for="username">Tài khoản:</label>
+            <div class="input-group">
+                <input id="username" class="form-control rounded-4" @bind="user.UserName" required />
+                <ValidationMessage For="@(() => user.UserName)" />
+            </div>
+            <label for="password">Mật khẩu:</label>
+            <div class="input-group">
+                <input id="password" class="form-control rounded-4" @bind="user.Password" type="password" required pattern="^\S+$" title="Không được chứa dấu cách" />
+                <ValidationMessage For="@(() => user.Password)" />
+            </div>
+            <label for="birthDate">Ngày Sinh:</label>
+            <div class="input-group">
+                <input id="birthDate" class="form-control rounded-4" type="date" @bind="user.BirthDate" required />
+                <ValidationMessage For="@(() => user.BirthDate)" />
+            </div>
+
+            <button class="login" type="submit">Đăng Ký</button>
+            <a class="login" href="/login">Đăng Nhập</a>
+        </EditForm>
+
+        <div class="toast-container position-fixed bottom-0 end-0 p-3">
+            <div class="toast fade" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header">
+                    <strong class="me-auto">Thông báo</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    @toastMessage
+                </div>
+            </div>
         </div>
-    </div>
+   </div>
+</body>
 
 
-    <div class="input-group">
-        <label for="phone">Số điện thoại:</label>
-        <InputText id="phone" class="form-control rounded-4" @bind-Value="user.PhoneNumber" required pattern="^(03|05|07|08|09)[0-9]{8}$" />
-        <ValidationMessage For="@(() => user.PhoneNumber)" />
-    </div>
-
-    <div class="input-group">
-        <label for="username">Tài khoản:</label>
-        <InputText id="username" class="form-control rounded-4" @bind-Value="user.UserName" required />
-        <ValidationMessage For="@(() => user.UserName)" />
-    </div>
-
-    <div class="input-group">
-        <label for="password">Mật khẩu:</label>
-        <InputText id="password" class="form-control rounded-4" @bind-Value="user.Password" type="password" required pattern="^\S+$" title="Không được chứa dấu cách" />
-        <ValidationMessage For="@(() => user.Password)" />
-    </div>
-
-    <div class="input-group">
-        <label for="birthDate">Ngày Sinh:</label>
-        <InputDate id="birthDate" class="form-control rounded-4" @bind-Value="user.BirthDate" required />
-        <ValidationMessage For="@(() => user.BirthDate)" />
-    </div>
-
-    <button class="login" type="submit">Đăng Ký</button>
-    <a class="login" href="/login">Đăng Nhập</a>
-</EditForm>
-
-<div class="toast-container position-fixed bottom-0 end-0 p-3">
-    <div class="toast fade" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="toast-header">
-            <strong class="me-auto">Thông báo</strong>
-            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body">
-            @toastMessage
-        </div>
-    </div>
-</div>
 @code {
     private UserRegistrationRequest user = new UserRegistrationRequest();
     private string toastMessage = string.Empty;
