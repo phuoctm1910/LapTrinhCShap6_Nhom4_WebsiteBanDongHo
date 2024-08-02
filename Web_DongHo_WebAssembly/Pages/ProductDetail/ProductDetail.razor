@@ -1,8 +1,9 @@
 ﻿@page "/productdetail/{ProductId:int}"
 @inject HttpClient Http
 @inject IJSRuntime JS
+@inject NavigationManager Navigation
+@inject AuthState Auth
 @using Newtonsoft.Json;
-@using Web_DongHo_WebAssembly.Models
 @using Web_DongHo_WebAssembly.Data
 <style>
 
@@ -141,7 +142,7 @@
                                     </div>
                                     <div class="btnListProduct">
                                         <button style="width: 100%; height: 40px; font-weight: bold;"
-                                        class="btn btn-outline-dark btn-fill my-2">
+                                        class="btn btn-outline-dark btn-fill my-2" @onclick="() => AddProductToCart(product.ProductId, Auth.Username)">
                                             THÊM VÀO
                                             GIỎ
                                             HÀNG
@@ -549,5 +550,55 @@
         var respone = await Http.GetStringAsync($"api/product/{ProductId}");
         product = JsonConvert.DeserializeObject<Product>(respone);
     }
+    public async Task AddProductToCart(int productId, string username)
+    {
+        if (string.IsNullOrEmpty(username))
+        {
+            bool isConfirmed = await JS.InvokeAsync<bool>("confirm", "Bạn chưa đăng nhập. Bạn có muốn đăng nhập không?");
 
+            if (isConfirmed)
+            {
+                Navigation.NavigateTo("/login");
+            }
+        }
+        else
+        {
+            try
+            {
+                var response = await Http.PostAsJsonAsync("api/cart/addToCart", new AddToCartRequest { ProductId = productId, Username = username });
+                var responseContent = await response.Content.ReadFromJsonAsync<ApiResponse>();
+
+                if (responseContent != null)
+                {
+                    if (!responseContent.Success)
+                    {
+                        await JS.InvokeVoidAsync("alert", responseContent.Message);
+                    }
+                    else
+                    {
+                        await JS.InvokeVoidAsync("alert", "Sản phẩm đã được thêm vào giỏ hàng.");
+                    }
+                }
+                else
+                {
+                    await JS.InvokeVoidAsync("alert", "Phản hồi không hợp lệ từ máy chủ.");
+                }
+            }
+            catch (Exception ex)
+            {
+                await JS.InvokeVoidAsync("console.log", $"Error adding product to cart: {ex.Message}");
+            }
+        }
+    }
+    public class ApiResponse
+    {
+        public bool Success { get; set; }
+        public string? Message { get; set; }
+        public string? Error { get; set; }
+    }
+    public class AddToCartRequest
+    {
+        public string Username { get; set; }
+        public int ProductId { get; set; }
+    }
 }
