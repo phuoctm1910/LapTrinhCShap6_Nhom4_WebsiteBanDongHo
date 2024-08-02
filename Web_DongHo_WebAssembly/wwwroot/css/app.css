@@ -2,6 +2,10 @@
 
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    position: relative;
+    min-height: 100%;
+    overflow-x: hidden;
+    background: border-box;
 }
 
 a, .btn-link {
@@ -48,3 +52,8 @@ a, .btn-link {
         right: 0.75rem;
         top: 0.5rem;
     }
+@media (min-width: 768px) {
+    html {
+        font-size: 16px;
+    }
+}
