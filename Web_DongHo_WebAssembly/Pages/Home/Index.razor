@@ -176,7 +176,7 @@
                                             <div class="contentBox">
                                                 <h3>@item.ProductName</h3>
                                                 <h2 class="price">@item.ProductPrice.ToString("#,##0").Replace(",", ".") ₫</h2>
-                                                <button class="buy bg-btn addProduct" data-product-id="@item.ProductId">Thêm vào giỏ hàng</button>
+                                                <button class="buy bg-btn addProduct" data-product-id="@item.ProductId" @onclick="() => AddProductToCart(item.ProductId, Auth.Username)">Thêm vào giỏ hàng</button>
                                             </div>
                                         </div>
                                     </div>
@@ -211,7 +211,7 @@
                                             <div class="contentBox">
                                                 <h3>@item.ProductName</h3>
                                                 <h2 class="price">@item.ProductPrice.ToString("#,##0").Replace(",", ".") ₫</h2>
-                                                <button class="buy bg-btn addProduct" data-product-id="@item.ProductId">Thêm vào giỏ hàng</button>
+                                                <button class="buy bg-btn addProduct" data-product-id="@item.ProductId" @onclick="() => AddProductToCart(item.ProductId, Auth.Username)">Thêm vào giỏ hàng</button>
                                             </div>
                                         </div>
                                     </div>
@@ -262,7 +262,7 @@
                                     <div class="contentBox">
                                         <h3>@item.ProductName</h3>
                                         <h2 class="price">@item.ProductPrice.ToString("#,##0").Replace(",", ".") ₫</h2>
-                                        <button class="buy bg-btn addProduct" data-product-id="@item.ProductId">Thêm vào giỏ hàng</button>
+                                        <button class="buy bg-btn addProduct" data-product-id="@item.ProductId" @onclick="() => AddProductToCart(item.ProductId, Auth.Username)">Thêm vào giỏ hàng</button>
                                     </div>
                                 </div>
                             </div>

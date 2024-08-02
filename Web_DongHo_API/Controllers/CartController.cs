@@ -8,6 +8,11 @@ using Web_DongHo_API.Data;
 
 namespace Web_DongHo_API.Controllers
 {
+    public class AddToCartRequest
+    {
+        public int ProductId { get; set; }
+        public string Username { get; set; }
+    }
     [Route("api/[controller]")]
     [ApiController]
     public class CartController : ControllerBase
@@ -20,13 +25,12 @@ namespace Web_DongHo_API.Controllers
         }
         [HttpPost]
         [Route("addToCart")]
-        public async Task<IActionResult> AddProductToCart(int productId, string userEmail)
+        public async Task<IActionResult> AddProductToCart([FromBody] AddToCartRequest request)
         {
             try
             {
-
                 // Find the user based on the provided email
-                var findUser = await _context.Users.FirstOrDefaultAsync(x => x.Email == userEmail);
+                var findUser = await _context.Users.FirstOrDefaultAsync(x => x.Email == request.Username);
                 if (findUser == null)
                 {
                     return NotFound(new { success = false, message = "Bạn chưa đăng nhập." });
@@ -49,7 +53,7 @@ namespace Web_DongHo_API.Controllers
                 }
 
                 // Find the product to be added to the cart
-                var productInBillDetails = await _context.Products.FindAsync(productId);
+                var productInBillDetails = await _context.Products.FindAsync(request.ProductId);
                 if (productInBillDetails == null)
                 {
                     return NotFound(new { success = false, message = "Không tìm thấy sản phẩm." });

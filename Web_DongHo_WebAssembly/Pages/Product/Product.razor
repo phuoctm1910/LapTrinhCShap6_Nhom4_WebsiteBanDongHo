@@ -1,6 +1,8 @@
 ﻿@page "/product"
 @inject HttpClient Http
 @inject IJSRuntime JS
+@inject AuthState Auth
+@inject NavigationManager Navigation
 @using Newtonsoft.Json;
 @using Web_DongHo_WebAssembly.Data;
 <style>
@@ -379,7 +381,7 @@
                             <div class="contentBox">
                                 <h3>@item.ProductName</h3>
                                 <h2 class="price">@item.ProductPrice.ToString("#,##0").Replace(",", ".") ₫</h2>
-                                <button class="buy bg-btn addProduct" data-product-id="@item.ProductId">Thêm vào giỏ hàng</button>
+                                <button class="buy bg-btn addProduct" data-product-id="@item.ProductId" @onclick="() => AddProductToCart(item.ProductId, Auth.Username)">Thêm vào giỏ hàng</button>
                             </div>
                         </div>
                     </div>
@@ -399,7 +401,6 @@
 
 @code {
     private List<Web_DongHo_WebAssembly.Data.Product> products;
-
     protected override async Task OnInitializedAsync()
     {
         try
@@ -417,5 +418,37 @@
             Console.WriteLine($"Error fetching products: {ex.Message}");
         }
     }
+    public async Task AddProductToCart(int productId, string username)
+    {
+        if (username == null)
+        {
+            await JS.InvokeVoidAsync("alert", "Bạn chưa đăng nhập");
+            Navigation.NavigateTo("/login");
+        }
+        else
+        {
+            try
+            {
+                var response = await Http.PostAsJsonAsync("api/addToCart", new { ProductId = productId, Username = username });
+                var responseContent = await response.Content.ReadFromJsonAsync<ApiResponse>();
+
+                if (responseContent != null && !responseContent.Success)
+                {
+                    await JS.InvokeVoidAsync("alert", responseContent.Message);
+                }
+            }
+            catch (Exception ex)
+            {
+                await JS.InvokeVoidAsync("alert", "Đã xảy ra lỗi: " + ex.Message);
+            }
+        }
+    }
+
+    public class ApiResponse
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; }
+    }
+
 }
 
