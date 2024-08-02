@@ -116,18 +116,19 @@ namespace Web_DongHo_API.Controllers
             {
                 return BadRequest("Email not found.");
             }
-
             var user = _context.Users.FirstOrDefault(u => u.Email == email);
+
             if (user == null)
             {
                 var userName = new string(fullName.Where(c => !char.IsWhiteSpace(c)).ToArray()).ToLower();
+                var newPassword = PasswordHelper.GeneratePassword(6);
 
                 var newUser = new User
                 {
                     Email = email,
                     UserName = userName,
                     FullName = fullName,
-                    Password = PasswordHelper.GetMd5Hash(PasswordHelper.GeneratePassword(6)),
+                    Password = PasswordHelper.GetMd5Hash(newPassword),
                     RoleId = 2
                 };
                 await _context.Users.AddAsync(newUser);
@@ -228,7 +229,7 @@ namespace Web_DongHo_API.Controllers
             });
         }
 
-        [HttpPost("forgot-password")]
+        [HttpPost("forget-password")]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
         {
             if (request == null || string.IsNullOrEmpty(request.Email))
