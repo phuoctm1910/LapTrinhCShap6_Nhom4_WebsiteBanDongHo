@@ -14,6 +14,7 @@ using Web_DongHo_API.Models;
 using Web_DongHo_API.Services;
 using Org.BouncyCastle.Asn1.Ocsp;
 using System.Linq;
+using System.Text;
 
 namespace Web_DongHo_API.Controllers
 {
@@ -112,7 +113,6 @@ namespace Web_DongHo_API.Controllers
 
             var email = claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
             var fullName = claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
-
             if (email == null)
             {
                 return BadRequest("Email not found.");
@@ -121,10 +121,12 @@ namespace Web_DongHo_API.Controllers
             var user = _context.Users.FirstOrDefault(u => u.Email == email);
             if (user == null)
             {
+                var userName = new string(fullName.Where(c => !char.IsWhiteSpace(c)).ToArray()).ToLower();
+
                 var newUser = new User
                 {
                     Email = email,
-                    UserName = email,
+                    UserName = userName,
                     FullName = fullName,
                     Password = PasswordHelper.GetMd5Hash(PasswordHelper.GeneratePassword(6)),
                     RoleId = 2
@@ -139,7 +141,6 @@ namespace Web_DongHo_API.Controllers
             var redirectUrl = $"https://localhost:44395/authentication?token={token}";
             return Redirect(redirectUrl);
         }
-
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] UserLoginRequest request)
         {
@@ -251,8 +252,6 @@ namespace Web_DongHo_API.Controllers
 
             return Ok(new { message = "Mật khẩu mới đã được gửi qua email." });
         }
-
-        [HttpGet("GetUserInfo")]
 
         [HttpPost("change-info")]
         public async Task<IActionResult> ChangeInfo([FromBody] ChangeInfoRequest user)

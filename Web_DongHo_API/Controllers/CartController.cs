@@ -3,6 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
+using System.Security.Claims;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Web_DongHo_API.Data;
 
@@ -13,6 +16,14 @@ namespace Web_DongHo_API.Controllers
         public int ProductId { get; set; }
         public string Username { get; set; }
     }
+    public class ApiResponse
+    {
+        public bool Success { get; set; }
+        public string? Message { get; set; }
+        public string? Error { get; set; }
+
+    }
+
     [Route("api/[controller]")]
     [ApiController]
     public class CartController : ControllerBase
@@ -23,6 +34,20 @@ namespace Web_DongHo_API.Controllers
         {
             _context = context;
         }
+        [HttpGet("items/count")]
+        public async Task<IActionResult> GetCartItemCount([FromQuery] string username)
+        {
+            if (string.IsNullOrEmpty(username))
+            {
+                return BadRequest("Username is required.");
+            }
+
+            var count = await _context.BillDetails
+                                       .Where(bd => bd.Bill.User.UserName == username)
+                                       .SumAsync(bd => bd.Quantity);
+
+            return Ok(count);
+        }
         [HttpPost]
         [Route("addToCart")]
         public async Task<IActionResult> AddProductToCart([FromBody] AddToCartRequest request)
@@ -30,14 +55,16 @@ namespace Web_DongHo_API.Controllers
             try
             {
                 // Find the user based on the provided email
-                var findUser = await _context.Users.FirstOrDefaultAsync(x => x.Email == request.Username);
+                var findUser = await _context.Users.FirstOrDefaultAsync(x => x.UserName == request.Username);
                 if (findUser == null)
                 {
-                    return NotFound(new { success = false, message = "Bạn chưa đăng nhập." });
+                    return NotFound(new ApiResponse { Success = false, Message = "Bạn chưa đăng nhập." });
                 }
 
                 // Check for a pending bill for the user
-                var findCurrentBill = await _context.Bills.FirstOrDefaultAsync(x => x.UserID == findUser.UserID && x.Status == "Pending");
+                var findCurrentBill = await _context.Bills
+                    .Include(b => b.BillDetails)
+                    .FirstOrDefaultAsync(x => x.UserID == findUser.UserID && x.Status == "Pending");
                 if (findCurrentBill == null)
                 {
                     // Create a new bill if none exists
@@ -56,12 +83,12 @@ namespace Web_DongHo_API.Controllers
                 var productInBillDetails = await _context.Products.FindAsync(request.ProductId);
                 if (productInBillDetails == null)
                 {
-                    return NotFound(new { success = false, message = "Không tìm thấy sản phẩm." });
+                    return NotFound(new ApiResponse { Success = false, Message = "Không tìm thấy sản phẩm." });
                 }
 
                 // Check if the product is already in the bill details
-                var billDetail = await _context.BillDetails
-                    .FirstOrDefaultAsync(bd => bd.BillId == findCurrentBill.BillId && bd.ProductId == productInBillDetails.ProductId);
+                var billDetail = findCurrentBill.BillDetails
+                    .FirstOrDefault(bd => bd.BillId == findCurrentBill.BillId && bd.ProductId == productInBillDetails.ProductId);
 
                 if (billDetail == null)
                 {
@@ -74,14 +101,13 @@ namespace Web_DongHo_API.Controllers
                         UnitPrice = (float)productInBillDetails.ProductPrice,
                         TotalPrice = (float)productInBillDetails.ProductPrice
                     };
-                    _context.BillDetails.Add(billDetail);
+                    findCurrentBill.BillDetails.Add(billDetail);
                 }
                 else
                 {
                     // Update the quantity and total price if the product is already in the cart
                     billDetail.Quantity += 1;
                     billDetail.TotalPrice += (float)productInBillDetails.ProductPrice;
-                    _context.BillDetails.Update(billDetail);
                 }
 
                 // Update the bill's total quantity and amount
@@ -91,35 +117,55 @@ namespace Web_DongHo_API.Controllers
                 // Save all changes to the database
                 await _context.SaveChangesAsync();
 
-                return Ok(new { success = true, message = "Đã thêm sản phẩm vào giỏ hàng của bạn." });
+                return Ok(new ApiResponse { Success = true, Message = "Đã thêm sản phẩm vào giỏ hàng của bạn." });
             }
             catch (Exception ex)
             {
                 // Log the error for debugging purposes
-                return StatusCode(500, new { success = false, message = "Đã xảy ra lỗi khi thêm sản phẩm vào giỏ hàng.", error = ex.Message });
+                // Add logging here (e.g., using ILogger)
+                return StatusCode(500, new ApiResponse { Success = false, Message = "Đã xảy ra lỗi khi thêm sản phẩm vào giỏ hàng.", Error = ex.Message });
             }
         }
+
         [HttpGet]
         [Route("getCart")]
-        public async Task<IActionResult> GetCartOfUser([FromBody] string email)
+        public async Task<IActionResult> GetCartOfUser([FromQuery] string username)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
-            if (user == null)
+            try
             {
-                return Unauthorized("Bạn cần đăng nhập tài khoản.");
+                if (string.IsNullOrEmpty(username))
+                {
+                    return BadRequest("Username is required.");
+                }
+
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == username);
+                if (user == null)
+                {
+                    return Unauthorized("Bạn cần đăng nhập tài khoản.");
+                }
+
+                var pendingBill = await _context.Bills
+                    .Include(b => b.BillDetails)
+                    .ThenInclude(bd => bd.Product)
+                    .FirstOrDefaultAsync(b => b.UserID == user.UserID && b.Status == "Pending");
+                var options = new JsonSerializerOptions
+                {
+                    ReferenceHandler = ReferenceHandler.Preserve,
+                    WriteIndented = true
+                };
+                if (pendingBill == null)
+                {
+                    return NoContent();
+                }
+
+                return new JsonResult(pendingBill, options);
             }
-
-            var pendingBill = await _context.Bills
-                .Include(b => b.BillDetails)
-                .ThenInclude(bd => bd.Product)
-                .FirstOrDefaultAsync(b => b.UserID == user.UserID && b.Status == "Pending");
-
-            if (pendingBill == null)
+            catch (Exception ex)
             {
-                return NoContent();
+                // Log the exception (use your preferred logging method)
+                // For example: _logger.LogError(ex, "An error occurred while fetching the cart.");
+                return StatusCode(500, "An error occurred while processing your request.");
             }
-
-            return Ok(pendingBill);
         }
         [HttpPost]
         [Route("removeProduct/{billDetailId}")]
@@ -148,7 +194,7 @@ namespace Web_DongHo_API.Controllers
         }
         [HttpPost]
         [Route("changeProductQuantity")]
-        public async Task<IActionResult> ChangeProductQuantity(int billDetailId, int change)
+        public async Task<IActionResult> ChangeProductQuantity([FromQuery] int billDetailId, [FromBody] int change)
         {
             var billDetail = await _context.BillDetails.FirstOrDefaultAsync(b => b.Id == billDetailId);
             if (billDetail == null)
@@ -192,6 +238,7 @@ namespace Web_DongHo_API.Controllers
 
             return Ok(new { success = true, message = "Đã cập nhật số lượng sản phẩm có trong giỏ hàng của bạn" });
         }
+
         [HttpPost]
         [Route("updateTotalBill")]
         public async Task<IActionResult> UpdateTotalAmount(int billId, float lastTotalAmount)

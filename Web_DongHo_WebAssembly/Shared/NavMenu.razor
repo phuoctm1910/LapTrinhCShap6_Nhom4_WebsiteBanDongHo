@@ -1,8 +1,9 @@
 ﻿@inject NavigationManager Navigation
 @inject IJSRuntime JS
 @inject AuthState AuthState
+@inject HttpClient Http
 @using System.IdentityModel.Tokens.Jwt;
-<nav class="navbar navbar-expand-lg bg-white border" style="padding: 0!important;">
+<nav class="navbar navbar-expand-lg bg-white border @NavbarClass" style="padding: 0!important;">
     <div class="row container-fluid p-0">
         <a class="navbar-brand col-2 text-center" href="/">
             <img src="images/logo.png" alt="logo" width="100px">
@@ -57,24 +58,95 @@
                         </ul>
                     </li>
                 }
-                <li class="nav-item">
-                    <a class="nav-link text-end position-relative nav-home" role="button" href="/giohang">
+            <li class="nav-item">
+                @if (AuthState.Username != null)
+                {
+                    <a class="nav-link text-end position-relative nav-home" role="button" @onclick="HandleCartClick">
                         Giỏ hàng
-                        <span class="position-absolute translate-middle badge rounded-pill bg-danger" style="top: 7px; right: -19px;">
-                            3
-                        </span>
+                        @if (cartItemCount > 0)
+                        {
+                            <span class="position-absolute translate-middle badge rounded-pill bg-danger" style="top: 7px; right: -19px;">
+                                @cartItemCount
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="position-absolute translate-middle badge rounded-pill bg-danger" style="top: 7px; right: -19px;display:none;">
+                                @cartItemCount
+                            </span>
+                        }
+
                     </a>
-                </li>
+                }
+                else
+                {
+                    <a class="nav-link text-end position-relative nav-home" role="button" @onclick="HandleCartClick">
+                        Giỏ hàng 2
+                    </a>
+                }
+
+            </li>
+
             </ul>
         </div>
     </div>
 </nav>
 
 @code {
-    protected override void OnInitialized()
+    private int cartItemCount;
+    private string NavbarClass = "sticky-top";
+
+
+    protected override async Task OnInitializedAsync()
     {
+
+
         AuthState.OnChange += StateHasChanged;
+        if (AuthState.IsLoggedIn)
+        {
+            await LoadCartItemCount();
+
+        }
+
+
     }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("initializeScrollHandler", DotNetObjectReference.Create(this));
+        }
+    }
+    [JSInvokable]
+    public void SetNavbarClass(string cssClass)
+    {
+        NavbarClass = cssClass;
+        StateHasChanged();
+    }
+    private async Task HandleCartClick()
+    {
+        if (!AuthState.IsLoggedIn)
+        {
+            bool isConfirmed = await JS.InvokeAsync<bool>("confirm", "Bạn chưa đăng nhập. Bạn có muốn đăng nhập?");
+            if (isConfirmed)
+            {
+                Navigation.NavigateTo("/login");
+            }
+        }
+        else
+        {
+            Navigation.NavigateTo("/giohang");
+        }
+    }
+
+    private async Task LoadCartItemCount()
+    {
+        var response = await Http.GetAsync($"api/cart/items/count?username={AuthState.Username}"); response.EnsureSuccessStatusCode();
+
+        var count = await response.Content.ReadAsStringAsync();
+        cartItemCount = int.Parse(count);
+    }
+
 
     private void Logout()
     {
@@ -88,4 +160,5 @@
         AuthState.OnChange -= StateHasChanged;
     }
 }
+
 

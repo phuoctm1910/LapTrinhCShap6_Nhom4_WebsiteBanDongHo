@@ -12,13 +12,14 @@ using static System.Net.WebRequestMethods;
 using Microsoft.JSInterop;
 using System.Net.Http.Json;
 using Web_DongHo_WebAssembly.Models;
+using static Web_DongHo_WebAssembly.Pages.Product.Product;
 
 namespace Web_DongHo_WebAssembly.Pages.Home
 {
     public partial class Index : ComponentBase
     {
         [Inject]
-        private HttpClient http { get; set; }
+        private HttpClient Http { get; set; }
         [Inject]
         private IJSRuntime JS { get; set; }
         [Inject]
@@ -36,7 +37,7 @@ namespace Web_DongHo_WebAssembly.Pages.Home
         {
             try
             {
-                var response = await http.GetAsync("api/Home/homeProducts");
+                var response = await Http.GetAsync("api/Home/homeProducts");
                 response.EnsureSuccessStatusCode();
 
                 var jsonResponse = await response.Content.ReadAsStringAsync();
@@ -57,41 +58,61 @@ namespace Web_DongHo_WebAssembly.Pages.Home
         }
         public async Task AddProductToCart(int productId, string username)
         {
-            if (username == null)
+            if (string.IsNullOrEmpty(username))
             {
-                await JS.InvokeVoidAsync("alert", "Bạn chưa đăng nhập");
-                Navigation.NavigateTo("/login");
+                bool isConfirmed = await JS.InvokeAsync<bool>("confirm", "Bạn chưa đăng nhập. Bạn có muốn đăng nhập không?");
+
+                if (isConfirmed)
+                {
+                    Navigation.NavigateTo("/login");
+                }
             }
             else
             {
                 try
                 {
-                    var response = await http.PostAsJsonAsync("api/addToCart", new { ProductId = productId, Username = username });
+                    var response = await Http.PostAsJsonAsync("api/cart/addToCart", new AddToCartRequest { ProductId = productId, Username = username });
                     var responseContent = await response.Content.ReadFromJsonAsync<ApiResponse>();
 
-                    if (responseContent != null && !responseContent.Success)
+                    if (responseContent != null)
                     {
-                        await JS.InvokeVoidAsync("alert", responseContent.Message);
+                        if (!responseContent.Success)
+                        {
+                            await JS.InvokeVoidAsync("alert", responseContent.Message);
+                        }
+                        else
+                        {
+                            await JS.InvokeVoidAsync("alert", "Sản phẩm đã được thêm vào giỏ hàng.");
+                        }
+                    }
+                    else
+                    {
+                        await JS.InvokeVoidAsync("alert", "Phản hồi không hợp lệ từ máy chủ.");
                     }
                 }
                 catch (Exception ex)
                 {
-                    await JS.InvokeVoidAsync("alert", "Đã xảy ra lỗi: " + ex.Message);
+                    await JS.InvokeVoidAsync("console.log", $"Error adding product to cart: {ex.Message}");
                 }
             }
         }
 
-
     }
-    public class HomeProductRequest
+    public class AddToCartRequest
     {
-        public List<Web_DongHo_WebAssembly.Data.Product> Productfirst8 { get; set; }
-        public List<Web_DongHo_WebAssembly.Data.Product> Productsecond8 { get; set; }
-        public List<Web_DongHo_WebAssembly.Data.Product> Productthird8 { get; set; }
+        public string Username { get; set; }
+        public int ProductId { get; set; }
     }
     public class ApiResponse
     {
         public bool Success { get; set; }
         public string Message { get; set; }
+    }
+
+    public class HomeProductRequest
+    {
+        public List<Web_DongHo_WebAssembly.Data.Product> Productfirst8 { get; set; }
+        public List<Web_DongHo_WebAssembly.Data.Product> Productsecond8 { get; set; }
+        public List<Web_DongHo_WebAssembly.Data.Product> Productthird8 { get; set; }
     }
 }
