@@ -3,6 +3,7 @@
 @inject HttpClient http
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
+@inject AuthState Auth
 @layout EmptyLayout
 
 <head>
@@ -162,7 +163,6 @@
         </div>
         <div class="input-group">
             <label for="PhoneNumber">Số điện thoại:</label>
-
             <input @bind="User.PhoneNumber" type="text" class="form-control rounded-4" id="PhoneNumber" required />
         </div>
         <div class="input-group">
@@ -201,14 +201,16 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var token = await JS.InvokeAsync<string>("localStorage.getItem", "authToken");
+        var username = Auth.Username;
 
-        if (!string.IsNullOrEmpty(token))
+        if (!string.IsNullOrEmpty(username))
         {
-            var response = await http.GetAsync("api/Account/GetUserInfo");
+            var response = await http.GetAsync($"api/Account/GetUserInfo?username={username}");
             if (response.IsSuccessStatusCode)
             {
                 User = await response.Content.ReadFromJsonAsync<ChangeInfoRequest>();
+                User.Gender = User.Gender ?? true; // Default to true if null
+                User.BirthDate = User.BirthDate == DateTime.MinValue ? (DateTime?)null : User.BirthDate;
             }
             else
             {
@@ -224,7 +226,7 @@
 
     private async Task HandleSubmit()
     {
-        var response = await http.PostAsJsonAsync("api/Account/change-info", User);
+        var response = await http.PostAsJsonAsync("api/Account/ChangeInfo", User);
         if (response.IsSuccessStatusCode)
         {
             toastMessage = "Thông tin đã được cập nhật thành công!";
@@ -246,11 +248,10 @@
     public class ChangeInfoRequest
     {
         public string FullName { get; set; }
-        public bool Gender { get; set; }
+        public bool? Gender { get; set; }
         public string PhoneNumber { get; set; }
         public string UserName { get; set; }
-        public string Password { get; set; }
-        public DateTime BirthDate { get; set; }
+        public DateTime? BirthDate { get; set; }
     }
 
     public class ErrorResponse

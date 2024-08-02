@@ -38,11 +38,11 @@ namespace Web_DongHo_API.Controllers
     public class ChangeInfoRequest
     {
         public string FullName { get; set; }
-        public bool Gender { get; set; }
+        public bool? Gender { get; set; }
         public string PhoneNumber { get; set; }
         public string UserName { get; set; }
         public string Password { get; set; }
-        public DateTime BirthDate { get; set; }
+        public DateTime? BirthDate { get; set; }
     }
     public class ForgotPasswordRequest
     {
@@ -95,7 +95,6 @@ namespace Web_DongHo_API.Controllers
             };
             return Challenge(properties, GoogleDefaults.AuthenticationScheme);
         }
-
         [HttpGet]
         public async Task<IActionResult> GoogleResponse()
         {
@@ -293,7 +292,33 @@ namespace Web_DongHo_API.Controllers
 
             return Ok(new { message = "User information updated successfully." });
         }
+        [HttpGet("GetUserInfo")]
+        public async Task<IActionResult> GetUserInfo([FromQuery] string username)
+        {
+            if (string.IsNullOrEmpty(username))
+            {
+                return Unauthorized("User is not authenticated.");
+            }
 
+            var user = await _context.Users
+                .Where(u => u.UserName == username)
+                .Select(u => new ChangeInfoRequest
+                {
+                    UserName = u.UserName,
+                    FullName = u.FullName,
+                    PhoneNumber = u.PhoneNumber,
+                    Gender = u.Gender ?? true,
+                    BirthDate = u.BirthDate ?? DateTime.MinValue // Default to DateTime.MinValue if null
+                })
+                .FirstOrDefaultAsync();
+
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+
+            return Ok(user);
+        }
         [HttpPost("change-password")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
         {
