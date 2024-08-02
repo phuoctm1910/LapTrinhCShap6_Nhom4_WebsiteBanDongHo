@@ -56,7 +56,7 @@ namespace Web_DongHo_WebAssembly.Pages.Home
                 Console.WriteLine($"An unexpected error occurred: {ex.Message}");
             }
         }
-        public async Task AddProductToCart(int productId, string username)
+        private async Task AddProductToCart(int productId, string username)
         {
             if (string.IsNullOrEmpty(username))
             {
@@ -83,6 +83,7 @@ namespace Web_DongHo_WebAssembly.Pages.Home
                         else
                         {
                             await JS.InvokeVoidAsync("alert", "Sản phẩm đã được thêm vào giỏ hàng.");
+                            await UpdateCartItemCount();
                         }
                     }
                     else
@@ -94,6 +95,20 @@ namespace Web_DongHo_WebAssembly.Pages.Home
                 {
                     await JS.InvokeVoidAsync("console.log", $"Error adding product to cart: {ex.Message}");
                 }
+            }
+        }
+
+        private async Task UpdateCartItemCount()
+        {
+            var response = await Http.GetAsync($"api/cart/items/count?username={Auth.Username}");
+            if (response.IsSuccessStatusCode)
+            {
+                var count = await response.Content.ReadAsStringAsync();
+                Auth.UpdateCartItemCount(int.Parse(count));
+            }
+            else
+            {
+                Auth.UpdateCartItemCount(0);
             }
         }
 

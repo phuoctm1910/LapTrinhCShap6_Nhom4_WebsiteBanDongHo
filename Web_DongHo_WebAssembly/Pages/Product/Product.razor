@@ -418,7 +418,7 @@
             Console.WriteLine($"Error fetching products: {ex.Message}");
         }
     }
-    public async Task AddProductToCart(int productId, string username)
+    private async Task AddProductToCart(int productId, string username)
     {
         if (string.IsNullOrEmpty(username))
         {
@@ -445,6 +445,7 @@
                     else
                     {
                         await JS.InvokeVoidAsync("alert", "Sản phẩm đã được thêm vào giỏ hàng.");
+                        await UpdateCartItemCount();
                     }
                 }
                 else
@@ -459,6 +460,19 @@
         }
     }
 
+    private async Task UpdateCartItemCount()
+    {
+        var response = await Http.GetAsync($"api/cart/items/count?username={Auth.Username}");
+        if (response.IsSuccessStatusCode)
+        {
+            var count = await response.Content.ReadAsStringAsync();
+            Auth.UpdateCartItemCount(int.Parse(count));
+        }
+        else
+        {
+            Auth.UpdateCartItemCount(0);
+        }
+    }
 
 
     public class AddToCartRequest

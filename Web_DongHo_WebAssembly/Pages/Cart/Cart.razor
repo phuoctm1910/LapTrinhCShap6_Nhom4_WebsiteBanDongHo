@@ -85,6 +85,11 @@
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadCart();
+    }
+
+    private async Task LoadCart()
+    {
         try
         {
             var username = Auth.Username;
@@ -99,6 +104,10 @@
                     if (cart == null)
                     {
                         await JS.InvokeVoidAsync("alert", "Bạn chưa có sản phẩm nào trong giỏ hàng");
+                    }
+                    else
+                    {
+                        await UpdateCartItemCount();
                     }
                 }
                 else if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
@@ -130,7 +139,7 @@
 
             if (response.IsSuccessStatusCode)
             {
-                await OnInitializedAsync();
+                await LoadCart();
             }
             else
             {
@@ -152,7 +161,7 @@
 
             if (response.IsSuccessStatusCode)
             {
-                await OnInitializedAsync();
+                await LoadCart();
             }
             else
             {
@@ -163,6 +172,20 @@
         catch (Exception ex)
         {
             await JS.InvokeVoidAsync("alert", $"An error occurred: {ex.Message}");
+        }
+    }
+
+    private async Task UpdateCartItemCount()
+    {
+        var response = await Http.GetAsync($"api/cart/items/count?username={Auth.Username}");
+        if (response.IsSuccessStatusCode)
+        {
+            var count = await response.Content.ReadAsStringAsync();
+            Auth.UpdateCartItemCount(int.Parse(count));
+        }
+        else
+        {
+            Auth.UpdateCartItemCount(0);
         }
     }
 }

@@ -28,6 +28,23 @@ namespace Web_DongHo_WebAssembly.Models
             }
         }
 
+        private int _cartItemCount;
+        public int CartItemCount
+        {
+            get => _cartItemCount;
+            set
+            {
+                _cartItemCount = value;
+                NotifyStateChanged();
+            }
+        }
+
         private void NotifyStateChanged() => OnChange?.Invoke();
+
+        public void UpdateCartItemCount(int count)
+        {
+            CartItemCount = count;
+            NotifyStateChanged();
+        }
     }
 }

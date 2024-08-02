@@ -3,6 +3,7 @@
 @inject AuthState AuthState
 @inject HttpClient Http
 @using System.IdentityModel.Tokens.Jwt;
+
 <nav class="navbar navbar-expand-lg bg-white border @NavbarClass" style="padding: 0!important;">
     <div class="row container-fluid p-0">
         <a class="navbar-brand col-2 text-center" href="/">
@@ -58,58 +59,34 @@
                         </ul>
                     </li>
                 }
-            <li class="nav-item">
-                @if (AuthState.Username != null)
-                {
+                <li class="nav-item">
                     <a class="nav-link text-end position-relative nav-home" role="button" @onclick="HandleCartClick">
                         Giỏ hàng
-                        @if (cartItemCount > 0)
+                        @if (AuthState.CartItemCount > 0)
                         {
                             <span class="position-absolute translate-middle badge rounded-pill bg-danger" style="top: 7px; right: -19px;">
-                                @cartItemCount
+                                @AuthState.CartItemCount
                             </span>
                         }
-                        else
-                        {
-                            <span class="position-absolute translate-middle badge rounded-pill bg-danger" style="top: 7px; right: -19px;display:none;">
-                                @cartItemCount
-                            </span>
-                        }
-
                     </a>
-                }
-                else
-                {
-                    <a class="nav-link text-end position-relative nav-home" role="button" @onclick="HandleCartClick">
-                        Giỏ hàng 2
-                    </a>
-                }
-
-            </li>
-
+                </li>
             </ul>
         </div>
     </div>
 </nav>
 
 @code {
-    private int cartItemCount;
     private string NavbarClass = "sticky-top";
-
 
     protected override async Task OnInitializedAsync()
     {
-
-
         AuthState.OnChange += StateHasChanged;
         if (AuthState.IsLoggedIn)
         {
-            await LoadCartItemCount();
-
+            await UpdateCartItemCount();
         }
-
-
     }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -117,12 +94,14 @@
             await JS.InvokeVoidAsync("initializeScrollHandler", DotNetObjectReference.Create(this));
         }
     }
+
     [JSInvokable]
     public void SetNavbarClass(string cssClass)
     {
         NavbarClass = cssClass;
         StateHasChanged();
     }
+
     private async Task HandleCartClick()
     {
         if (!AuthState.IsLoggedIn)
@@ -139,20 +118,33 @@
         }
     }
 
-    private async Task LoadCartItemCount()
+    private async Task UpdateCartItemCount()
     {
-        var response = await Http.GetAsync($"api/cart/items/count?username={AuthState.Username}"); response.EnsureSuccessStatusCode();
-
-        var count = await response.Content.ReadAsStringAsync();
-        cartItemCount = int.Parse(count);
+        if (AuthState.IsLoggedIn)
+        {
+            var response = await Http.GetAsync($"api/cart/items/count?username={AuthState.Username}");
+            if (response.IsSuccessStatusCode)
+            {
+                var count = await response.Content.ReadAsStringAsync();
+                AuthState.UpdateCartItemCount(int.Parse(count));
+            }
+            else
+            {
+                AuthState.UpdateCartItemCount(0);
+            }
+        }
+        else
+        {
+            AuthState.UpdateCartItemCount(0);
+        }
     }
 
-
-    private void Logout()
+    private async void Logout()
     {
         AuthState.IsLoggedIn = false;
         AuthState.Username = null;
         Navigation.NavigateTo("/");
+        await UpdateCartItemCount(); // Update the cart count after logout
     }
 
     public void Dispose()
@@ -160,5 +152,3 @@
         AuthState.OnChange -= StateHasChanged;
     }
 }
-
-

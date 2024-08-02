@@ -550,7 +550,7 @@
         var respone = await Http.GetStringAsync($"api/product/{ProductId}");
         product = JsonConvert.DeserializeObject<Product>(respone);
     }
-    public async Task AddProductToCart(int productId, string username)
+    private async Task AddProductToCart(int productId, string username)
     {
         if (string.IsNullOrEmpty(username))
         {
@@ -577,6 +577,7 @@
                     else
                     {
                         await JS.InvokeVoidAsync("alert", "Sản phẩm đã được thêm vào giỏ hàng.");
+                        await UpdateCartItemCount();
                     }
                 }
                 else
@@ -588,6 +589,20 @@
             {
                 await JS.InvokeVoidAsync("console.log", $"Error adding product to cart: {ex.Message}");
             }
+        }
+    }
+
+    private async Task UpdateCartItemCount()
+    {
+        var response = await Http.GetAsync($"api/cart/items/count?username={Auth.Username}");
+        if (response.IsSuccessStatusCode)
+        {
+            var count = await response.Content.ReadAsStringAsync();
+            Auth.UpdateCartItemCount(int.Parse(count));
+        }
+        else
+        {
+            Auth.UpdateCartItemCount(0);
         }
     }
     public class ApiResponse
