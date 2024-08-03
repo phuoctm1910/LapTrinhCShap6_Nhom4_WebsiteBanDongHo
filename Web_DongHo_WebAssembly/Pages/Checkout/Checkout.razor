@@ -1,8 +1,11 @@
 ﻿@page "/thanhtoan"
 @using Web_DongHo_WebAssembly.Data
 @using Web_DongHo_WebAssembly.Models
+@using Microsoft.JSInterop;
 @inject HttpClient Http
 @inject IJSRuntime JSRuntime
+@inject AuthState Auth
+@inject NavigationManager Navigation
 
 <div class="container mt-5">
     <h2>Thanh Toán</h2>
@@ -27,7 +30,7 @@
                 <div class="mb-3">
                     <label for="paymentMethod" class="form-label">Phương thức thanh toán:</label>
                     <div class="form-check">
-                        <input type="radio" id="cash" class="form-check-input" name="paymentMethod" value="Cash" @onclick="() => SetPaymentMethod(Cash)" checked="@(!orderModel.PaymentMethod.Equals(Cash))" />
+                        <input type="radio" id="cash" class="form-check-input" name="paymentMethod" value="Cash" @onclick="() => SetPaymentMethod(Cash)"  checked="@orderModel.PaymentMethod.Equals(Cash)" />
                         <label class="form-check-label" for="cash">Tiền Mặt</label>
                     </div>
                     <div class="form-check">
@@ -40,113 +43,164 @@
             </EditForm>
         </div>
         <div class="col-md-4">
-            <div class="row">
-                <h4>Giỏ hàng của bạn<span class="badge bg-primary ">@totalQuantity</span></h4>
-            </div>
-            <ul class="list-group my-4">
-                @foreach (var item in BillDetails)
+            @if (Auth.Username != null)
+            {
+                @if (checkout != null)
                 {
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6>@item.Product.ProductName</h6>
-                            <small>@item.Quantity x @item.UnitPrice.ToString("#,##0").Replace(",", ".") ₫</small>
-                        </div>
-                        <span>@item.TotalPrice.ToString("#,##0").Replace(",", ".") ₫</span>
-                    </li>
+                    <div class="row">
+                        <h4>Giỏ hàng của bạn<span class="badge bg-primary">@checkout?.BillDetails.Count</span></h4>
+                    </div>
+                    <ul class="list-group my-4">
+                        @foreach (var item in checkout.BillDetails)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6>@item.Product.ProductName</h6>
+                                    <small>@item.Quantity x @item.UnitPrice.ToString("#,##0").Replace(",", ".") ₫</small>
+                                </div>
+                                <span>@item.TotalPrice.ToString("#,##0").Replace(",", ".") ₫</span>
+                            </li>
+                        }
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <p>Vận chuyển</p>
+                            <p>@(shippingCost == 15000 ? "Vận chuyển chậm - 15.000 ₫" : "Vận chuyển nhanh - 25.000 ₫")</p>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Total (VND)</span>
+                            <strong>@checkout.TotalAmount.ToString("#,##0").Replace(",", ".") ₫</strong>
+                        </li>
+                    </ul>
                 }
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <p>Vận chuyển</p>
-                    <p>@(TotalAmount - totalAllUnit == 15000 ? "Vận chuyển chậm - 15.000 ₫" : "Vận chuyển nhanh - 25.000 ₫")</p>
-                </li>
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <span>Total (VND)</span>
-                    <strong>@TotalAmount.ToString("#,##0").Replace(",", ".") ₫</strong>
-                </li>
-            </ul>
-            <div id="paypal-container" style="display: none;">
-                <div id="paypal-button-container"></div>
-            </div>
+                <div id="paypal-container" style="display: none;">
+                    <div id="paypal-button-container"></div>
+                </div>
+            }
+            else
+            {
+                Navigation.NavigateTo("/");
+            }
         </div>
     </div>
 </div>
 
 @code {
-    private OrderModel orderModel = new OrderModel();
-    private List<BillDetails> BillDetails = new List<BillDetails>();
-    private int totalQuantity;
-    private decimal totalAllUnit;
-    private decimal TotalAmount;
-    private const string Cash = "Cash";
-    private const string Paypal = "Paypal";
+    public OrderModel orderModel = new OrderModel();
+    public Bill checkout;
+    public int shippingCost;
+    public float LastTotalAmount;
+    public const string Cash = "Cash";
+    public const string Paypal = "Paypal";
 
     protected override async Task OnInitializedAsync()
     {
-        BillDetails = await LoadBillDetails();
-        totalQuantity = BillDetails.Sum(item => item.Quantity);
-        totalAllUnit = BillDetails.Sum(item => item.TotalPrice);
-        TotalAmount = totalAllUnit + CalculateShipping();
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
+        await LoadCheckout();
+        if (checkout != null)
         {
-            await JSRuntime.InvokeVoidAsync("initializeCheckout", TotalAmount);
+            await CalculateShippingCost();
+        }
+        else
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Bạn chưa có sản phẩm nào trong giỏ hàng");
         }
     }
 
-    private async Task<List<BillDetails>> LoadBillDetails()
+    private async Task LoadCheckout()
     {
-        // Replace with actual data fetching logic
-        return new List<BillDetails>
-    {
-            new BillDetails { Product = new Product { ProductName = "Product 1" }, Quantity = 1, UnitPrice = 100000, TotalPrice = 100000 },
-            new BillDetails { Product = new Product { ProductName = "Product 2" }, Quantity = 2, UnitPrice = 200000, TotalPrice = 400000 }
-        };
+        var username = Auth.Username;
+        if (username != null)
+        {
+            try
+            {
+                var response = await Http.GetAsync($"api/Checkout/getBill?username={username}");
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    checkout = Newtonsoft.Json.JsonConvert.DeserializeObject<Bill>(responseContent);
+                }
+                else
+                {
+                    await JSRuntime.InvokeVoidAsync("alert", "Không thể tải giỏ hàng");
+                }
+            }
+            catch (Exception ex)
+            {
+                await JSRuntime.InvokeVoidAsync("alert", $"Lỗi: {ex.Message}");
+            }
+        }
+        else
+        {
+            Navigation.NavigateTo("/");
+        }
     }
 
-    private decimal CalculateShipping()
+    private async Task CalculateShippingCost()
     {
-        return 15000; // Replace with actual logic to calculate shipping
+        if (checkout != null)
+        {
+            var totalAllUnit = checkout.BillDetails.Sum(bd => bd.TotalPrice);
+            shippingCost = (int)(checkout.TotalAmount - totalAllUnit);
+            await JSRuntime.InvokeVoidAsync("console.log", checkout.TotalAmount, totalAllUnit);
+        }
     }
 
     private async Task CompletePurchase()
     {
-        await JSRuntime.InvokeVoidAsync("console.log", orderModel);
+        var response = await Http.PostAsJsonAsync($"api/Checkout/completePurchase?username={Auth.Username}", orderModel);
+        if (response.IsSuccessStatusCode)
+        {
+            var isOk = await JSRuntime.InvokeAsync<bool>("showAlertAndConfirm", "Bạn đã thanh toán thành công");
+            if (isOk)
+            {
+                Navigation.NavigateTo("/");
+            }
+        }
+        else
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Xảy ra lỗi khi thanh toán");
+        }
     }
 
     private void OnFormFieldChanged(ChangeEventArgs e)
     {
-        Console.WriteLine("Form field changed");
-        Console.WriteLine(orderModel);
         TogglePayPalButtonVisibility();
     }
 
     private void SetPaymentMethod(string method)
     {
         orderModel.PaymentMethod = method;
-        Console.WriteLine($"Payment method changed to: {orderModel.PaymentMethod}");
         TogglePayPalButtonVisibility();
-        JSRuntime.InvokeVoidAsync("console.log", orderModel.PaymentMethod);
     }
 
-    private void TogglePayPalButtonVisibility()
+    private async void TogglePayPalButtonVisibility()
     {
         bool isFormValid = !string.IsNullOrEmpty(orderModel.FullName) &&
                            !string.IsNullOrEmpty(orderModel.Phone) &&
                            !string.IsNullOrEmpty(orderModel.Address);
 
-        Console.WriteLine($"Form valid: {isFormValid}, Payment Method: {orderModel.PaymentMethod}");
         if (isFormValid && orderModel.PaymentMethod == Paypal)
         {
-            Console.WriteLine("Showing PayPal button");
             JSRuntime.InvokeVoidAsync("showPayPalButton");
+            PayPalPayment(checkout.TotalAmount);
+
         }
         else
         {
-            Console.WriteLine("Hiding PayPal button");
             JSRuntime.InvokeVoidAsync("hidePayPalButton");
         }
+    }
+
+    private void PayPalPayment(float total)
+    {
+        var orderModelSending = new OrderModel
+        {
+            FullName = orderModel.FullName,
+            Phone = orderModel.Phone,
+            Address = orderModel.Address,
+            PaymentMethod = orderModel.PaymentMethod
+        };
+        int totalAmountInt = (int)Math.Round(total);
+        JSRuntime.InvokeVoidAsync("initializeCheckout", totalAmountInt, Auth.Username, orderModelSending);
+
     }
 
     public class OrderModel
@@ -154,12 +208,9 @@
         public string FullName { get; set; }
         public string Phone { get; set; }
         public string Address { get; set; }
-        public string PaymentMethod { get; set; } = "Cash";
+        public string PaymentMethod { get; set; } = Cash;
     }
 }
-
-
-
 
 <style>
     .container {

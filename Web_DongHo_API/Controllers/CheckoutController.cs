@@ -1,15 +1,17 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Web_DongHo_API.Data;
+using System;
 
 namespace Web_DongHo_API.Controllers
 {
 
     public class CompletePurchaseRequest
     {
-        public string Email { get; set; }
         public string FullName { get; set; }
         public string Phone { get; set; }
         public string Address { get; set; }
@@ -30,11 +32,11 @@ namespace Web_DongHo_API.Controllers
             _context = context;
         }
 
-        [HttpGet("pendingBill")]
-        public async Task<IActionResult> GetPendingBill([FromBody] PendingBillRequest request)
+        [HttpGet("getBill")]
+        public async Task<IActionResult> GetPendingBill([FromQuery] string username)
         {
 
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == username);
             if (user == null)
             {
                 return NotFound(new { success = false, message = "Bạn chưa đăng nhập." });
@@ -44,21 +46,30 @@ namespace Web_DongHo_API.Controllers
                 .Include(b => b.BillDetails)
                 .ThenInclude(bd => bd.Product)
                 .FirstOrDefaultAsync(b => b.UserID == user.UserID && b.Status == "Pending");
+            var options = new JsonSerializerOptions
+            {
+                ReferenceHandler = ReferenceHandler.Preserve,
+                WriteIndented = true
+            };
 
             if (pendingBill == null)
             {
                 return NotFound(new { success = false, message = "Không có hóa đơn đang chờ xử lý." });
             }
 
-            return Ok(pendingBill);
+            return new JsonResult(pendingBill, options);
         }
 
         [HttpPost("completePurchase")]
-        public async Task<IActionResult> CompletePurchase([FromBody] CompletePurchaseRequest request)
+        public async Task<IActionResult> CompletePurchase([FromQuery] string username, [FromBody] CompletePurchaseRequest request)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
+            Console.WriteLine("Received completePurchase request for username: " + username);
+            Console.WriteLine("Received completePurchase: " + request);
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == username);
             if (user == null)
             {
+                Console.WriteLine("User not found: " + username);
                 return NotFound(new { success = false, message = "Bạn chưa đăng nhập." });
             }
 
@@ -68,10 +79,12 @@ namespace Web_DongHo_API.Controllers
 
             if (pendingBill == null)
             {
+                Console.WriteLine("No pending bill found for user: " + user.UserID);
                 return NotFound(new { success = false, message = "Không có hóa đơn đang chờ xử lý." });
             }
 
             // Update shipping information and complete purchase
+            Console.WriteLine("Updating pending bill for user: " + user.UserID);
             pendingBill.RecipientName = request.FullName;
             pendingBill.RecipientPhoneNumber = request.Phone;
             pendingBill.RecipientAddress = request.Address;
@@ -80,6 +93,7 @@ namespace Web_DongHo_API.Controllers
 
             _context.Bills.Update(pendingBill);
             await _context.SaveChangesAsync();
+            Console.WriteLine("Bill updated successfully for user: " + user.UserID);
 
             return Ok(new { success = true, message = "Đặt hàng thành công." });
         }

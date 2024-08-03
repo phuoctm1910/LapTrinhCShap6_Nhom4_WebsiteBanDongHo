@@ -60,18 +60,18 @@
                     <div class="row">
                         <div class="col text-center" style="padding-left:0;">Tổng @cart?.BillDetails.Count sản phẩm</div>
                     </div>
-                    <form class="formCart">
-                        <p>Vận chuyển</p>
-                        <select>
-                            <option class="text-muted">Vận chuyển chậm- 15.000 ₫</option>
-                            <option class="text-muted">Vận chuyển nhanh- 25.000 ₫</option>
-                        </select>
-                        <p>Mã khuyến mãi</p>
-                        <input class="input" id="code" placeholder="Nhập mã khuyến mãi">
-                    </form>
+                        <form class="formCart">
+                            <p>Vận chuyển</p>
+                            <select class="form-select" @onchange="(e) => UpdateShippingCost(e)">
+                                <option class="text-muted" value="15000">Vận chuyển chậm- 15.000 ₫</option>
+                                <option class="text-muted" value="25000">Vận chuyển nhanh- 25.000 ₫</option>
+                            </select>
+                            <p>Mã khuyến mãi</p>
+                            <input class="input" id="code" placeholder="Nhập mã khuyến mãi">
+                        </form>
                     <div class="row" style="border-top: 1px solid rgba(0,0,0,.1); padding: 2vh 0;">
                         <div class="col">Tổng giá:</div>
-                        <div class="col text-right">@cart?.BillDetails.Sum(b => b.Product.ProductPrice * b.Quantity).ToString("N0") ₫</div>
+                        <div class="col text-right">@LastTotalAmount.ToString("N0") ₫</div>
                     </div>
                     <a class="btn btnCart" href="/thanhtoan">Đặt hàng</a>
                 </div>
@@ -82,10 +82,13 @@
 
 @code {
     private Bill cart;
+    private int shippingCost = 15000; // Default shipping cost
+    private float LastTotalAmount;
 
     protected override async Task OnInitializedAsync()
     {
         await LoadCart();
+        CalculateTotalAmount();
     }
 
     private async Task LoadCart()
@@ -140,6 +143,7 @@
             if (response.IsSuccessStatusCode)
             {
                 await LoadCart();
+                CalculateTotalAmount();
             }
             else
             {
@@ -162,6 +166,7 @@
             if (response.IsSuccessStatusCode)
             {
                 await LoadCart();
+                CalculateTotalAmount();
             }
             else
             {
@@ -186,6 +191,32 @@
         else
         {
             Auth.UpdateCartItemCount(0);
+        }
+    }
+
+    private async void UpdateShippingCost(ChangeEventArgs e)
+    {
+        shippingCost = int.Parse(e.Value.ToString());
+        CalculateTotalAmount();
+        await UpdateTotalBillInDb();
+    }
+
+    private void CalculateTotalAmount()
+    {
+        LastTotalAmount = (cart?.BillDetails.Sum(b => b.Product.ProductPrice * b.Quantity) ?? 0) + shippingCost;
+        StateHasChanged();
+    }
+
+    private async Task UpdateTotalBillInDb()
+    {
+        if (cart != null)
+        {
+            var response = await Http.PostAsJsonAsync($"api/cart/updateTotalBill?billId={cart.BillId}", LastTotalAmount);
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorMessage = await response.Content.ReadAsStringAsync();
+                await JS.InvokeVoidAsync("alert", $"Error: {errorMessage}");
+            }
         }
     }
 }
