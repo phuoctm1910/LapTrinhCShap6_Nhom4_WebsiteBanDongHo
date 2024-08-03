@@ -92,6 +92,7 @@
         if (firstRender)
         {
             await JS.InvokeVoidAsync("initializeScrollHandler", DotNetObjectReference.Create(this));
+            await UpdateCartItemCount();
         }
     }
 

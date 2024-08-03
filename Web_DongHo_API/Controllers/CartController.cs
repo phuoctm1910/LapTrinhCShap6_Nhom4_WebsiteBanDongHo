@@ -43,7 +43,7 @@ namespace Web_DongHo_API.Controllers
             }
 
             var count = await _context.BillDetails
-                                       .Where(bd => bd.Bill.User.UserName == username)
+                                       .Where(bd => bd.Bill.User.UserName == username && bd.Bill.Status =="Pending")
                                        .SumAsync(bd => bd.Quantity);
 
             return Ok(count);
@@ -241,7 +241,7 @@ namespace Web_DongHo_API.Controllers
 
         [HttpPost]
         [Route("updateTotalBill")]
-        public async Task<IActionResult> UpdateTotalAmount(int billId, float lastTotalAmount)
+        public async Task<IActionResult> UpdateTotalAmount([FromQuery]int billId,[FromBody] float lastTotalAmount)
         {
             var billUpdateTotalAmount = await _context.Bills.FirstOrDefaultAsync(b => b.BillId == billId);
             if (billUpdateTotalAmount == null)
