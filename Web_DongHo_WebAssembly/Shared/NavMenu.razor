@@ -62,12 +62,22 @@
                 <li class="nav-item">
                     <a class="nav-link text-end position-relative nav-home" role="button" @onclick="HandleCartClick">
                         Giỏ hàng
-                        @if (AuthState.CartItemCount > 0)
+                        @if (AuthState.IsLoggedIn)
                         {
-                            <span class="position-absolute translate-middle badge rounded-pill bg-danger" style="top: 7px; right: -19px;">
-                                @AuthState.CartItemCount
-                            </span>
+                            @if (AuthState.CartItemCount > 0)
+                            {
+                                <span class="position-absolute translate-middle badge rounded-pill bg-danger" style="top: 7px; right: -19px;">
+                                    @AuthState.CartItemCount
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="position-absolute translate-middle badge rounded-pill bg-danger" style="top: 7px; right: -19px;">
+                                    0
+                                </span>
+                            }
                         }
+
                     </a>
                 </li>
             </ul>
