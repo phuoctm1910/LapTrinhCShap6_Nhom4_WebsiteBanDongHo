@@ -3,25 +3,50 @@
 @inject NavigationManager Navigation
 @inject AuthState AuthState
 @using System.IdentityModel.Tokens.Jwt;
+
 @code {
     protected override async Task OnInitializedAsync()
     {
-        var uri = new Uri(Navigation.Uri);
-        var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
-        var token = query["token"];
-
-        if (!string.IsNullOrEmpty(token))
+        try
         {
-            await JS.InvokeVoidAsync("localStorage.setItem", "authToken", token);
+            var uri = new Uri(Navigation.Uri);
+            var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+            var token = query["token"];
 
-            var handler = new JwtSecurityTokenHandler();
-            var decodedToken = handler.ReadJwtToken(token);
-            var username = decodedToken.Claims.FirstOrDefault(c => c.Type == "Name")?.Value;
+            if (!string.IsNullOrEmpty(token))
+            {
+                await JS.InvokeVoidAsync("localStorage.setItem", "authToken", token);
 
-            AuthState.IsLoggedIn = true;
-            AuthState.Username = username;
+                var handler = new JwtSecurityTokenHandler();
+                var decodedToken = handler.ReadJwtToken(token);
+                var username = decodedToken.Claims.FirstOrDefault(c => c.Type == "Name")?.Value;
+                var role = decodedToken.Claims.FirstOrDefault(c => c.Type == "Role")?.Value;
+                Console.WriteLine($"Token: {token}");
+                Console.WriteLine($"Username: {username}");
+                Console.WriteLine($"Role: {role}");
+                AuthState.IsLoggedIn = true;
+                AuthState.Username = username;
+                AuthState.Role = role;
+                Console.WriteLine($"Auth.Role: {AuthState.Role}");
+
+                if (AuthState.Role.ToString() == "2")
+                {
+                    Navigation.NavigateTo("/");
+                }
+                else
+                {
+                    Navigation.NavigateTo("/admin");
+                }
+            }
+            else
+            {
+                Navigation.NavigateTo("/");
+            }
         }
-
-        Navigation.NavigateTo("/");
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error during authentication: {ex.Message}");
+            Navigation.NavigateTo("/");
+        }
     }
 }

@@ -5,7 +5,7 @@ html, body {
     position: relative;
     min-height: 100%;
     overflow-x: hidden;
-    background: border-box;
+    box-sizing: border-box;
 }
 
 a, .btn-link {

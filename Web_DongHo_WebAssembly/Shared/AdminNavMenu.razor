@@ -1,0 +1,81 @@
+﻿@inject AuthState Auth
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+<div class="top-row pl-4 navbar navbar-dark">
+    <a class="navbar-brand" href="/admin">WatchFives</a>
+</div>
+
+<div class="">
+    <ul class="nav flex-column">
+        <li class="nav-item px-3">
+            <NavLink class="nav-link" href="/admin" Match="NavLinkMatch.All">
+                <span class="oi oi-home" aria-hidden="true"></span> Home
+            </NavLink>
+        </li>
+        <li class="nav-item px-3">
+            <NavLink class="nav-link" data-bs-toggle="collapse" href="#collapseRole" aria-expanded="false" aria-controls="collapseRole">
+                <span class="oi oi-list" aria-hidden="true"></span> Chức Vụ <span class="ms-2 oi oi-chevron-bottom" aria-hidden="true" style="font-size:11px;"></span>
+            </NavLink>
+            <div class="collapse" id="collapseRole">
+                <div class="card card-body" style="background-color: rgba(255,255,255,0.1);">
+                    <a class="dropdown-item" href="/admin/roleList">Danh Sách Chức Vụ</a>
+                    <a class="dropdown-item" href="/admin/addRole">Thêm Chức Vụ</a>
+                </div>
+            </div>
+        </li>
+        <li class="nav-item px-3">
+            <NavLink class="nav-link" data-bs-toggle="collapse" href="#collapseCategory" aria-expanded="false" aria-controls="collapseCategory">
+                <span class="oi oi-list" aria-hidden="true"></span> Loại Đồng Hồ <span class="ms-2 oi oi-chevron-bottom" aria-hidden="true" style="font-size:11px;"></span>
+            </NavLink>
+            <div class="collapse" id="collapseCategory">
+                <div class="card card-body" style="background-color: rgba(255,255,255,0.1);">
+                    <a class="dropdown-item" href="/admin/categoryList">Danh Sách Loại Đồng Hồ</a>
+                    <a class="dropdown-item" href="/admin/addCategory">Thêm Loại Đồng Hồ</a>
+                </div>
+            </div>
+        </li>
+        <li class="nav-item px-3 ">
+            <NavLink class="nav-link" data-bs-toggle="collapse" href="#collapseBrand" aria-expanded="false" aria-controls="collapseBrand">
+                <span class="oi oi-list" aria-hidden="true"></span> Thương Hiệu <span class="ms-2 oi oi-chevron-bottom" aria-hidden="true" style="font-size:11px;"></span>
+            </NavLink>
+            <div class="collapse" id="collapseBrand">
+                <div class="card card-body" style="background-color: rgba(255,255,255,0.1);">
+                    <a class="dropdown-item" href="/admin/brandList">Danh Sách Thương Hiệu</a>
+                    <a class="dropdown-item" href="/admin/addBrand">Thêm Thương Hiệu</a>
+                </div>
+            </div>
+        </li>
+        <li class="nav-item px-3 ">
+            <NavLink class="nav-link" data-bs-toggle="collapse" href="#collapseUser" aria-expanded="false" aria-controls="collapseUser">
+                <span class="oi oi-person" aria-hidden="true"></span> Người Dùng <span class="ms-2 oi oi-chevron-bottom" aria-hidden="true" style="font-size:11px;"></span>
+            </NavLink>
+            <div class="collapse" id="collapseUser">
+                <div class="card card-body" style="background-color: rgba(255,255,255,0.1);">
+                    <a class="dropdown-item" href="/admin/userList">Danh Sách Người Dùng</a>
+                </div>
+            </div>
+        </li>
+    </ul>
+</div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        Auth.OnChange += StateHasChanged;
+        if (Auth.IsLoggedIn)
+        {
+            if (Auth.Role != "1")
+            {
+                await JS.InvokeVoidAsync("alert", "Bạn không phải là Admin");
+                await JS.InvokeVoidAsync("localStorage.removeItem", "authToken");
+                Auth.IsLoggedIn = false;
+                Auth.Username = null;
+                Navigation.NavigateTo("/");
+            }
+        }
+        else
+        {
+            Navigation.NavigateTo("/");
+        }
+    }
+}

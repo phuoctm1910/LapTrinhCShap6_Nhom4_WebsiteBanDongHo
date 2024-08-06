@@ -27,7 +27,16 @@ namespace Web_DongHo_WebAssembly.Models
                 NotifyStateChanged();
             }
         }
-
+        private string _role;
+        public string Role
+        {
+            get => _role;
+            set
+            {
+                _role = value;
+                NotifyStateChanged();
+            }
+        }
         private int _cartItemCount;
         public int CartItemCount
         {

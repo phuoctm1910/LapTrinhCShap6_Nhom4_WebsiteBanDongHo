@@ -94,6 +94,7 @@
         if (AuthState.IsLoggedIn)
         {
             await UpdateCartItemCount();
+
         }
     }
 
@@ -152,6 +153,7 @@
 
     private async void Logout()
     {
+        await JS.InvokeVoidAsync("localStorage.removeItem", "authToken");
         AuthState.IsLoggedIn = false;
         AuthState.Username = null;
         Navigation.NavigateTo("/");
