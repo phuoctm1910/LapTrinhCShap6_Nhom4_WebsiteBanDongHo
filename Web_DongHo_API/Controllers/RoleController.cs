@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -25,7 +27,13 @@ namespace Web_DongHo_API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Role>>> GetAllRoles()
         {
-            return await _context.Roles.ToListAsync();
+            var listRole = await _context.Roles.ToListAsync();
+            var options = new JsonSerializerOptions
+            {
+                ReferenceHandler = ReferenceHandler.Preserve,
+                WriteIndented = true
+            };
+            return new JsonResult(listRole, options);
         }
 
         // GET: api/Role/5
@@ -44,10 +52,14 @@ namespace Web_DongHo_API.Controllers
 
         // PUT: api/Role/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateRole(int id, RoleVM roleVM)
+        [HttpPost("editRole/{roleId:int}")]
+        public async Task<IActionResult> UpdateRole(int roleId, [FromBody] RoleVM roleVM)
         {
-            var category = await _context.Roles.FindAsync(id);
+            if (roleVM == null || !ModelState.IsValid)
+            {
+                return BadRequest(new { message = "Invalid role data." });
+            }
+            var category = await _context.Roles.FirstOrDefaultAsync(c => c.RoleId == roleId);
             if (category != null)
             {
                 category.RoleName = roleVM.RoleName;
@@ -55,17 +67,21 @@ namespace Web_DongHo_API.Controllers
             }
             else
             {
-                return NotFound();
+                return NotFound(new {message = "Role Not Found"});
             }
 
-            return NoContent();
+            return Ok(new { message = "Role information updated successfully." });
         }
 
         // POST: api/Role
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
+        [HttpPost("addRole")]
         public async Task<ActionResult> CreateRole([FromBody] RoleVM roleVM)
         {
+            if (roleVM == null || !ModelState.IsValid)
+            {
+                return BadRequest(new { message = "Invalid role data." });
+            }
             var role = new Role
             {
                 RoleName = roleVM.RoleName
@@ -73,7 +89,7 @@ namespace Web_DongHo_API.Controllers
             _context.Roles.Add(role);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetRole", new { id = role.RoleId }, role);
+            return Ok(new { message = "Role information updated successfully." });
         }
 
         // DELETE: api/Role/5

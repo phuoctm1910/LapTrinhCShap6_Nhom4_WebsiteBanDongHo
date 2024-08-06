@@ -1,0 +1,90 @@
+﻿@page "/admin/addRole"
+@inject HttpClient Http
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+@using Web_DongHo_WebAssembly.Data
+@using Web_DongHo_WebAssembly.Models
+@using Newtonsoft.Json
+@layout AdminLayout
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- left column -->
+            <div class="col-md-12">
+                <!-- jquery validation -->
+                <div class="card card-dark">
+                    <div class="card-header">
+                        <h3 class="card-title">Điền đầy đủ thông tin</h3>
+                    </div>
+                    <!-- /.card-header -->
+                    <!-- form start -->
+                    <form @onsubmit="HandleSubmit">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label class="control-label">Tên Chức Vụ</label>
+                                <input @bind="roleAdd.RoleName" id="RoleName" class="form-control" required pattern="^[a-zA-Z\s]+$" title="Chỉ được điền chữ cái và dấu cách" />
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-outline-dark">Submit</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="toast-container position-fixed bottom-0 end-0 p-3">
+                    <div class="toast fade" role="alert" aria-live="assertive" aria-atomic="true">
+                        <div class="toast-header">
+                            <strong class="me-auto">Thông báo</strong>
+                            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                        <div class="toast-body">
+                            @toastMessage
+                        </div>
+                    </div>
+                </div>
+                <!-- /.card -->
+            </div>
+            <!--/.col (left) -->
+            <!-- right column -->
+            <div class="col-md-6">
+            </div>
+            <!--/.col (right) -->
+        </div>
+        <!-- /.row -->
+    </div><!-- /.container-fluid -->
+</section>
+@code {
+    private string toastMessage = string.Empty;
+    private Role roleAdd = new Role();
+
+    async Task HandleSubmit()
+    {
+        var result = await Http.PostAsJsonAsync("api/role/addRole", roleAdd);
+        if (result.IsSuccessStatusCode)
+        {
+            toastMessage = "Thêm chức vụ thành công!";
+            ShowToast();
+            await BackToAdmin();
+        }
+        else
+        {
+            var errorResponse = await result.Content.ReadFromJsonAsync<ErrorResponse>();
+            toastMessage = errorResponse?.Message ?? "Đã xảy ra lỗi khi thêm thông tin.";
+            ShowToast();
+        }
+    }
+    private void ShowToast()
+    {
+        JS.InvokeVoidAsync("eval", "var toastElement = document.querySelector('.toast'); var toast = new bootstrap.Toast(toastElement); toast.show();");
+    }
+    public class ErrorResponse
+    {
+        public string Message { get; set; }
+    }
+    async Task BackToAdmin()
+    {
+        Navigation.NavigateTo("/admin/roleList");
+
+    }
+}

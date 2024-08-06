@@ -1,0 +1,84 @@
+﻿@page "/admin/roleList"
+@inject HttpClient Http
+@inject IJSRuntime JS
+@using Web_DongHo_WebAssembly.Data
+@using Web_DongHo_WebAssembly.Models
+@using Newtonsoft.Json
+@layout AdminLayout
+<style>
+    table thead th {
+        vertical-align: middle !important;
+    }
+</style>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Bảng Chức Vụ</h3>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body">
+                        <table id="example1" class="table table-bordered table-striped">
+                            <thead>
+                                <tr class="text-center">
+                                    <th>Id</th>
+                                    <th>Tên Chức Vụ</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in listRole)
+                                {
+                                    <tr class="text-center align-middle">
+                                        <td>@item.RoleId</td>
+                                        <td>@item.RoleName</td>
+                                        <td>
+                                            <a class="btn btn-secondary" href="admin/editRole/@item.RoleId">Edit</a>
+                                            @*<a class="btn btn-outline-danger" asp-action="Delete" asp-route-id="@item.RoleId">Delete</a>*@
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.col -->
+        </div>
+        <!-- /.row -->
+    </div>
+    <!-- /.container-fluid -->
+</section>
+
+
+@code {
+    private List<Role> listRole = new List<Role>();
+    protected override async Task OnInitializedAsync()
+    {
+        await GetListRole();
+    }
+    async Task GetListRole()
+    {
+        try
+        {
+            var response = await Http.GetStringAsync("api/role");
+            listRole = JsonConvert.DeserializeObject<List<Role>>(response);
+            if (listRole == null)
+            {
+                await JS.InvokeVoidAsync("console.log", "Trống");
+            }
+
+        }
+        catch (Exception e)
+        {
+            await JS.InvokeVoidAsync("console.log", e.Message);
+
+        }
+
+    }
+}
