@@ -157,7 +157,7 @@
             <ValidationSummary />
             <label for="fullName">Họ và Tên:</label>
             <div class="input-group">
-                <input id="fullName" class="form-control rounded-4" @bind="user.FullName" required pattern="^[a-zA-Z\s]+$" title="Chỉ được nhập các ký tự chữ cái và dấu cách" />
+                <input id="fullName" class="form-control rounded-4" @bind="user.FullName" required pattern="^[A-Za-zÀ-ỹ][A-Za-zÀ-ỹ\s]*[A-Za-zÀ-ỹ]$" title="Chỉ được nhập các ký tự chữ cái và dấu cách" />
                 <ValidationMessage For="@(() => user.FullName)" />
             </div>
 
