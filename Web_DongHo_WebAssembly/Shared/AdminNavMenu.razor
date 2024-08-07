@@ -2,7 +2,11 @@
 @inject IJSRuntime JS
 @inject NavigationManager Navigation
 <div class="top-row pl-4 navbar navbar-dark">
-    <a class="navbar-brand" href="/admin">WatchFives</a>
+    <div>
+        <img src="/images/logo2.png" class="rounded" alt="..." width="70px">
+        <a class="navbar-brand" href="/admin">WatchFives</a>
+
+    </div>
 </div>
 
 <div class="">
@@ -70,6 +74,7 @@
                 await JS.InvokeVoidAsync("localStorage.removeItem", "authToken");
                 Auth.IsLoggedIn = false;
                 Auth.Username = null;
+                await Task.Delay(2000);
                 Navigation.NavigateTo("/");
             }
         }
