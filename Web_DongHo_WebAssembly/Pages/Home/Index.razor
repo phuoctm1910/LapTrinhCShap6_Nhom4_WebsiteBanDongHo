@@ -145,192 +145,203 @@
             transform: scale(1.5); /* Zoom ra */
         }
 </style>
-<div>
-    <div class="container my-5">
-        <div class="home-title text-white my-4">
-            <h3>Sản Phẩm Nổi bật</h3>
-        </div>
-        <div id="featuredProductsCarousel" class="carousel slide position-relative" data-bs-ride="carousel">
-            <div class="carousel-inner">
-                <div class="carousel-item active" data-bs-interval="5000">
-                    <div class="row">
-                        @if (homeProductRequest.Productfirst8 != null)
-                        {
-                            @foreach (var item in homeProductRequest.Productfirst8)
-                            {
-                                <div class="col-md-3 my-3 product">
-                                    <div>
-                                        <div class="card">
-                                            <div class="imgBox">
-                                                <a class="card-link" href="productdetail/@item.ProductId" asp-controller="ProductDetail" asp-action="Index" asp-route-id="@item.ProductId">
-                                                    @if (true)
-                                                    {
-                                                        <img src="images/Product/@item.ProductImages" width="280px;" height="300px;" alt="@item.ProductName" class="watch">
-                                                    }
-                                                    else
-                                                    {
-                                                        <img src="uploads/default.png" alt="default image" class="watch">
-                                                    }
-                                                </a>
-                                            </div>
-                                            <div class="contentBox">
-                                                <h3>@item.ProductName</h3>
-                                                <h2 class="price">@item.ProductPrice.ToString("#,##0").Replace(",", ".") ₫</h2>
-                                                <button class="buy bg-btn addProduct" data-product-id="@item.ProductId" @onclick="() => AddProductToCart(item.ProductId, Auth.Username)">Thêm vào giỏ hàng</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            }
+@if (homeProductRequest == null)
+{
+    <LoadingIndicator></LoadingIndicator>
+}
+else
+{
+    <div>
 
-                        }
-
-                    </div>
-                </div>
-                <div class="carousel-item" data-bs-interval="5000">
-                    <div class="row">
-                        @if (homeProductRequest.Productsecond8 != null)
-                        {
-                            @foreach (var item in homeProductRequest.Productfirst8)
-                            {
-                                <div class="col-md-3 my-3 product">
-                                    <div>
-                                        <div class="card">
-                                            <div class="imgBox">
-                                                <a class="card-link" href="productdetail/@item.ProductId" asp-controller="ProductDetail" asp-action="Index" asp-route-id="@item.ProductId">
-                                                    @if (item.ProductImageList.Any())
-                                                    {
-                                                        <img src="images/Product/@item.ProductImageList.First()" width="280px;" height="300px;" alt="@item.ProductName" class="watch">
-                                                    }
-                                                    else
-                                                    {
-                                                        <img src="uploads/default.png" alt="default image" class="watch">
-                                                    }
-                                                </a>
-                                            </div>
-                                            <div class="contentBox">
-                                                <h3>@item.ProductName</h3>
-                                                <h2 class="price">@item.ProductPrice.ToString("#,##0").Replace(",", ".") ₫</h2>
-                                                <button class="buy bg-btn addProduct" data-product-id="@item.ProductId" @onclick="() => AddProductToCart(item.ProductId, Auth.Username)">Thêm vào giỏ hàng</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            }
-
-                        }
-                    </div>
-                </div>
-            </div>
-            <div class="btnList">
-                <button class="carousel-control-prev position-absolute" type="button" data-bs-target="#featuredProductsCarousel" data-bs-slide="prev" style="left:-120px!important;height:fit-content;top:220px!important">
-                    <span aria-hidden="true"><i class="fa-solid fa-arrow-left-long" style="font-size:24px; color:darkgray;"></i></span>
-                    <span class="visually-hidden">Previous</span>
-                </button>
-                <button class="carousel-control-next position-absolute" type="button" data-bs-target="#featuredProductsCarousel" data-bs-slide="next" style="right: -120px !important;height:fit-content; top: 220px !important">
-                    <span aria-hidden="true"><i class="fa-solid fa-arrow-right-long" style="font-size: 24px; color: darkgray;"></i></span>
-                    <span class="visually-hidden">Next</span>
-                </button>
-            </div>
-        </div>
-    </div>
-    <div style="background-color: #393939">
         <div class="container my-5">
             <div class="home-title text-white my-4">
-                <h3>Sản Phẩm Khác</h3>
+                <h3>Sản Phẩm Nổi bật</h3>
             </div>
-            <div class="row">
-                @if (homeProductRequest.Productthird8 != null)
-                {
-                    @foreach (var item in homeProductRequest.Productthird8)
-                    {
-                        <div class="col-md-3 my-3 product">
-                            <div>
-                                <div class="card">
-                                    <div class="imgBox">
-                                        <a class="card-link" href="productdetail/@item.ProductId" asp-controller="ProductDetail" asp-action="Index" asp-route-id="@item.ProductId">
-                                            @if (true) //Vài có admin đổi lại điều kiện và img
-                                            {
-                                                <img src="images/Product/@item.ProductImages" width="280px;" height="300px;" alt="@item.ProductName" class="watch">
-                                            }
-                                            else
-                                            {
-                                                <img src="uploads/default.png" alt="default image" class="watch">
-                                            }
-                                        </a>
+            <div id="featuredProductsCarousel" class="carousel slide position-relative" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                    <div class="carousel-item active" data-bs-interval="5000">
+                        <div class="row">
+                            @if (homeProductRequest.Productfirst8 != null)
+                            {
+                                @foreach (var item in homeProductRequest.Productfirst8)
+                                {
+                                    <div class="col-md-3 my-3 product">
+                                        <div>
+                                            <div class="card">
+                                                <div class="imgBox">
+                                                    <a class="card-link" href="productdetail/@item.ProductId" asp-controller="ProductDetail" asp-action="Index" asp-route-id="@item.ProductId">
+                                                        @if (true)
+                                                        {
+                                                            <img src="images/Product/@item.ProductImages" width="280px;" height="300px;" alt="@item.ProductName" class="watch">
+                                                        }
+                                                        else
+                                                        {
+                                                            <img src="uploads/default.png" alt="default image" class="watch">
+                                                        }
+                                                    </a>
+                                                </div>
+                                                <div class="contentBox">
+                                                    <h3>@item.ProductName</h3>
+                                                    <h2 class="price">@item.ProductPrice.ToString("#,##0").Replace(",", ".") ₫</h2>
+                                                    <button class="buy bg-btn addProduct" data-product-id="@item.ProductId" @onclick="() => AddProductToCart(item.ProductId, Auth.Username)">Thêm vào giỏ hàng</button>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="contentBox">
-                                        <h3>@item.ProductName</h3>
-                                        <h2 class="price">@item.ProductPrice.ToString("#,##0").Replace(",", ".") ₫</h2>
-                                        <button class="buy bg-btn addProduct" data-product-id="@item.ProductId" @onclick="() => AddProductToCart(item.ProductId, Auth.Username)">Thêm vào giỏ hàng</button>
+                                }
+
+                            }
+
+                        </div>
+                    </div>
+                    <div class="carousel-item" data-bs-interval="5000">
+                        <div class="row">
+                            @if (homeProductRequest.Productsecond8 != null)
+                            {
+                                @foreach (var item in homeProductRequest.Productfirst8)
+                                {
+                                    <div class="col-md-3 my-3 product">
+                                        <div>
+                                            <div class="card">
+                                                <div class="imgBox">
+                                                    <a class="card-link" href="productdetail/@item.ProductId" asp-controller="ProductDetail" asp-action="Index" asp-route-id="@item.ProductId">
+                                                        @if (item.ProductImageList.Any())
+                                                        {
+                                                            <img src="images/Product/@item.ProductImageList.First()" width="280px;" height="300px;" alt="@item.ProductName" class="watch">
+                                                        }
+                                                        else
+                                                        {
+                                                            <img src="uploads/default.png" alt="default image" class="watch">
+                                                        }
+                                                    </a>
+                                                </div>
+                                                <div class="contentBox">
+                                                    <h3>@item.ProductName</h3>
+                                                    <h2 class="price">@item.ProductPrice.ToString("#,##0").Replace(",", ".") ₫</h2>
+                                                    <button class="buy bg-btn addProduct" data-product-id="@item.ProductId" @onclick="() => AddProductToCart(item.ProductId, Auth.Username)">Thêm vào giỏ hàng</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="btnList">
+                    <button class="carousel-control-prev position-absolute" type="button" data-bs-target="#featuredProductsCarousel" data-bs-slide="prev" style="left:-120px!important;height:fit-content;top:220px!important">
+                        <span aria-hidden="true"><i class="fa-solid fa-arrow-left-long" style="font-size:24px; color:darkgray;"></i></span>
+                        <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button class="carousel-control-next position-absolute" type="button" data-bs-target="#featuredProductsCarousel" data-bs-slide="next" style="right: -120px !important;height:fit-content; top: 220px !important">
+                        <span aria-hidden="true"><i class="fa-solid fa-arrow-right-long" style="font-size: 24px; color: darkgray;"></i></span>
+                        <span class="visually-hidden">Next</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div style="background-color: #393939">
+            <div class="container my-5">
+                <div class="home-title text-white my-4">
+                    <h3>Sản Phẩm Khác</h3>
+                </div>
+                <div class="row">
+                    @if (homeProductRequest.Productthird8 != null)
+                    {
+                        @foreach (var item in homeProductRequest.Productthird8)
+                        {
+                            <div class="col-md-3 my-3 product">
+                                <div>
+                                    <div class="card">
+                                        <div class="imgBox">
+                                            <a class="card-link" href="productdetail/@item.ProductId" asp-controller="ProductDetail" asp-action="Index" asp-route-id="@item.ProductId">
+                                                @if (true) //Vài có admin đổi lại điều kiện và img
+                                                {
+                                                    <img src="images/Product/@item.ProductImages" width="280px;" height="300px;" alt="@item.ProductName" class="watch">
+                                                }
+                                                else
+                                                {
+                                                    <img src="uploads/default.png" alt="default image" class="watch">
+                                                }
+                                            </a>
+                                        </div>
+                                        <div class="contentBox">
+                                            <h3>@item.ProductName</h3>
+                                            <h2 class="price">@item.ProductPrice.ToString("#,##0").Replace(",", ".") ₫</h2>
+                                            <button class="buy bg-btn addProduct" data-product-id="@item.ProductId" @onclick="() => AddProductToCart(item.ProductId, Auth.Username)">Thêm vào giỏ hàng</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        }
                     }
-                }
 
-            </div>
-        </div>
-    </div>
-    <div class="container my-5">
-        <div class="home-title text-white my-4">
-            <h3>Video Sản Phẩm</h3>
-        </div>
-        <div id="featuredProductsCarousel" class="carousel slide position-relative" data-bs-ride="carousel">
-            <div id="carouselExampleIndicators" class="carousel slide">
-                <div class="carousel-indicators">
-                    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
-                    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2"></button>
-                    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Slide 3"></button>
                 </div>
-                <div class="carousel-inner">
-                    <div class="carousel-item active">
-                        <iframe width="1260" height="500" src="https://www.youtube.com/embed/x4KFwDQnGks?si=WTQ4I1tFS8p4c9zo?&mute=1" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            </div>
+        </div>
+        <div class="container my-5">
+            <div class="home-title text-white my-4">
+                <h3>Video Sản Phẩm</h3>
+            </div>
+            <div id="featuredProductsCarousel" class="carousel slide position-relative" data-bs-ride="carousel">
+                <div id="carouselExampleIndicators" class="carousel slide">
+                    <div class="carousel-indicators">
+                        <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+                        <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2"></button>
+                        <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Slide 3"></button>
                     </div>
-                    <div class="carousel-item">
-                        <iframe width="1260" height="500" src="https://www.youtube.com/embed/duZc9xyDpss?si=C6szmFT-PZ-z1b4_?&mute=1" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                    <div class="carousel-inner">
+                        <div class="carousel-item active">
+                            <iframe width="1260" height="500" src="https://www.youtube.com/embed/x4KFwDQnGks?si=WTQ4I1tFS8p4c9zo?&mute=1" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                        </div>
+                        <div class="carousel-item">
+                            <iframe width="1260" height="500" src="https://www.youtube.com/embed/duZc9xyDpss?si=C6szmFT-PZ-z1b4_?&mute=1" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                        </div>
+                        <div class="carousel-item">
+                            <iframe width="1260" height="500" src="https://www.youtube.com/embed/fFWA9Pt9WVI?si=E1_2zkTTbuH70pVZ?&mute=1" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                        </div>
                     </div>
-                    <div class="carousel-item">
-                        <iframe width="1260" height="500" src="https://www.youtube.com/embed/fFWA9Pt9WVI?si=E1_2zkTTbuH70pVZ?&mute=1" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-                    </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Next</span>
+                    </button>
                 </div>
-                <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
-                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                    <span class="visually-hidden">Previous</span>
-                </button>
-                <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
-                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                    <span class="visually-hidden">Next</span>
-                </button>
+            </div>
+        </div>
+        <div class="container text-center my-5">
+            <h1>Giới Thiệu Về Đồng Hồ</h1>
+            <div class="row">
+                <div class="col-md-4">
+                    <img src="images/Product/1001.png" alt="Personalization" class="img-fluid">
+                    <h3>Rolex Submariner</h3>
+                    <p>
+                        Rolex Submariner là một trong những mẫu đồng hồ lặn biểu tượng nhất của thương hiệu Rolex. Ra mắt lần đầu vào năm 1953, Submariner được biết đến với thiết kế bền bỉ, khả năng chống nước tuyệt vời lên đến 300 mét, và vòng bezel xoay một chiều. Đây là lựa chọn phổ biến của các thợ lặn chuyên nghiệp cũng như những người yêu thích đồng hồ.
+                    </p>
+                </div>
+                <div class="col-md-4">
+                    <img src="images/Product/1002.png" alt="Packaging" class="img-fluid">
+                    <h3>Tag Heuer Monaco</h3>
+                    <p>
+                        Tag Heuer Monaco là một chiếc đồng hồ mang tính cách mạng khi ra mắt vào năm 1969. Đây là chiếc đồng hồ chronograph tự động đầu tiên trên thế giới với vỏ vuông. Monaco nổi tiếng qua việc được Steve McQueen đeo trong bộ phim "Le Mans" năm 1971. Thiết kế độc đáo và mang tính biểu tượng đã làm cho Monaco trở thành một phần không thể thiếu trong bộ sưu tập của những người yêu thích đồng hồ.
+                    </p>
+                </div>
+                <div class="col-md-4">
+                    <img src="images/Product/1003.png" alt="Collect In Store" class="img-fluid">
+                    <h3>Omega Speedmaster</h3>
+                    <p>
+                        Omega Speedmaster, hay còn được biết đến với tên gọi “Moonwatch”, là một trong những mẫu đồng hồ nổi tiếng nhất của Omega. Được NASA chọn làm đồng hồ chính thức cho các chuyến bay không gian, Speedmaster đã cùng các phi hành gia lên mặt trăng trong sứ mệnh Apollo 11 vào năm 1969. Thiết kế chronograph cổ điển và lịch sử gắn liền với thám hiểm không gian đã làm nên sự đặc biệt của Speedmaster.
+                    </p>
+                </div>
             </div>
         </div>
     </div>
-    <div class="container text-center my-5">
-        <h1>Giới Thiệu Về Đồng Hồ</h1>
-        <div class="row">
-            <div class="col-md-4">
-                <img src="images/Product/1001.png" alt="Personalization" class="img-fluid">
-                <h3>Rolex Submariner</h3>
-                <p>
-                    Rolex Submariner là một trong những mẫu đồng hồ lặn biểu tượng nhất của thương hiệu Rolex. Ra mắt lần đầu vào năm 1953, Submariner được biết đến với thiết kế bền bỉ, khả năng chống nước tuyệt vời lên đến 300 mét, và vòng bezel xoay một chiều. Đây là lựa chọn phổ biến của các thợ lặn chuyên nghiệp cũng như những người yêu thích đồng hồ.
-                </p>
-            </div>
-            <div class="col-md-4">
-                <img src="images/Product/1002.png" alt="Packaging" class="img-fluid">
-                <h3>Tag Heuer Monaco</h3>
-                <p>
-                    Tag Heuer Monaco là một chiếc đồng hồ mang tính cách mạng khi ra mắt vào năm 1969. Đây là chiếc đồng hồ chronograph tự động đầu tiên trên thế giới với vỏ vuông. Monaco nổi tiếng qua việc được Steve McQueen đeo trong bộ phim "Le Mans" năm 1971. Thiết kế độc đáo và mang tính biểu tượng đã làm cho Monaco trở thành một phần không thể thiếu trong bộ sưu tập của những người yêu thích đồng hồ.
-                </p>
-            </div>
-            <div class="col-md-4">
-                <img src="images/Product/1003.png" alt="Collect In Store" class="img-fluid">
-                <h3>Omega Speedmaster</h3>
-                <p>
-                    Omega Speedmaster, hay còn được biết đến với tên gọi “Moonwatch”, là một trong những mẫu đồng hồ nổi tiếng nhất của Omega. Được NASA chọn làm đồng hồ chính thức cho các chuyến bay không gian, Speedmaster đã cùng các phi hành gia lên mặt trăng trong sứ mệnh Apollo 11 vào năm 1969. Thiết kế chronograph cổ điển và lịch sử gắn liền với thám hiểm không gian đã làm nên sự đặc biệt của Speedmaster.
-                </p>
-            </div>
-        </div>
-    </div>
-</div>
+
+}
+
+
 

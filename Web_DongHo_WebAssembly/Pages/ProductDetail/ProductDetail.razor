@@ -7,7 +7,7 @@
 @using Web_DongHo_WebAssembly.Data
 <style>
 
-  .magnifier {
+    .magnifier {
         position: relative;
         width: 200px;
         margin: 0 auto;
@@ -87,18 +87,22 @@
             line-height: 36px;
             box-sizing: border-box;
         }
-
 </style>
 
-
+@if (product == null)
+{
+    <LoadingIndicator></LoadingIndicator>
+}
+else
+{
     <div style="background-color: #f0efef;">
         <div class="container" style="background-color: white;width: calc(100% - 300px) !important;">
             <div class="row">
                 <div class="col-md-9" style="background-color: white;">
                     <div class="row">
 
-                    @if (product != null)
-                    {
+                        @if (product != null)
+                        {
                             <!--Ảnh Sản Phẩm-->
                             <div class="col-md-6">
                                 <div class="magnifier" style="text-align: center;">
@@ -106,11 +110,11 @@
                                     <img id="main-image" src="images/Product/@product.ProductImages" alt="original image" class="small-img" />
                                 </div>
                                 <div class="carousel-wrap my-5">
-                                @*   <div class="owl-carousel" style="margin: 0 auto;">
-                                    <div class="item"><img src="images/Product/@product.ProductImages" alt="thumbnail image"></div>
-                                    <div class="item"><img src="images/Product/@product.ProductImages" alt="thumbnail image"></div>
-                                    <div class="item"><img src="images/Product/@product.ProductImages" alt="thumbnail image"></div>
-                                </div> *@
+                                    @*   <div class="owl-carousel" style="margin: 0 auto;">
+                                            <div class="item"><img src="images/Product/@product.ProductImages" alt="thumbnail image"></div>
+                                            <div class="item"><img src="images/Product/@product.ProductImages" alt="thumbnail image"></div>
+                                            <div class="item"><img src="images/Product/@product.ProductImages" alt="thumbnail image"></div>
+                                        </div> *@
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -137,18 +141,18 @@
                                     </div>
                                     <div class="price-quantity" style="display: inline-block;">
                                         <span class="text-danger" id="price"
-                                        style="font-size: 30px; font-weight: bold;">5.585.000₫</span>
+                                              style="font-size: 30px; font-weight: bold;">5.585.000₫</span>
                                         <span id="quantity">(Chỉ còn <span class="text-danger">5</span> sản phẩm )</span>
                                     </div>
                                     <div class="btnListProduct">
                                         <button style="width: 100%; height: 40px; font-weight: bold;"
-                                        class="btn btn-outline-dark btn-fill my-2" @onclick="() => AddProductToCart(product.ProductId, Auth.Username)">
+                                                class="btn btn-outline-dark btn-fill my-2" @onclick="() => AddProductToCart(product.ProductId, Auth.Username)">
                                             THÊM VÀO
                                             GIỎ
                                             HÀNG
                                         </button>
                                         <button style="width: 100%; height: 40px; font-weight: bold;"
-                                        class="btn btn-dark btn-fill my-2">
+                                                class="btn btn-dark btn-fill my-2">
                                             LIÊN HỆ XEM HÀNG
                                         </button>
                                     </div>
@@ -160,24 +164,24 @@
                                                     Đổi hàng trong vòng 7 ngày
                                                     <span class="question" title-popup="Đổi hàng trong vòng 7 ngày">
                                                         <svg width="11px" height="11px" xmlns="http://www.w3.org/2000/svg"
-                                                        xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px"
-                                                        y="0px" viewBox="0 0 512 512"
-                                                        style="enable-background:new 0 0 512 512;" xml:space="preserve">
-                                                            <g>
-                                                                <g>
-                                                                    <path d="M256,0C114.62,0,0,114.62,0,256s114.62,256,256,256s256-114.62,256-256S397.38,0,256,0z M256,486.4    C128.956,486.4,25.6,383.044,25.6,256S128.956,25.6,256,25.6S486.4,128.956,486.4,256S383.044,486.4,256,486.4z">
+                                                             xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px"
+                                                             y="0px" viewBox="0 0 512 512"
+                                                             style="enable-background:new 0 0 512 512;" xml:space="preserve">
+                                                        <g>
+                                                        <g>
+                                                        <path d="M256,0C114.62,0,0,114.62,0,256s114.62,256,256,256s256-114.62,256-256S397.38,0,256,0z M256,486.4    C128.956,486.4,25.6,383.044,25.6,256S128.956,25.6,256,25.6S486.4,128.956,486.4,256S383.044,486.4,256,486.4z">
                                                                     </path>
                                                                 </g>
                                                             </g>
-                                                            <g>
-                                                                <g>
-                                                                    <path d="M319.258,119.578c-13.858-11.981-31.718-17.98-53.581-17.98h-4.403c-22.673,0-42.001,7.074-58.001,21.197    c-17.604,15.753-26.402,36.804-26.402,63.198c0,4.275,1.203,7.603,3.601,10.001c2.398,2.15,5.325,3.072,8.798,2.799    c3.2,0,5.999-1.203,8.397-3.601c2.662-2.654,4.002-5.854,4.002-9.6c0-14.925,3.465-27.853,10.402-38.801    c10.129-15.454,26.522-23.202,49.203-23.202c19.2,0,33.724,5.197,43.597,15.599c8.26,8.55,12.527,19.601,12.8,33.203    c0,11.998-2.534,22.673-7.603,32c-5.871,10.675-16.401,22.4-31.599,35.2c-12.8,10.402-21.734,21.999-26.803,34.799    c-5.077,12.271-7.603,27.878-7.603,46.797c0,3.746,1.203,6.801,3.601,9.199c2.398,2.15,5.325,3.2,8.798,3.2    c3.2,0,5.999-1.05,8.397-3.2c2.662-2.398,4.002-5.453,4.002-9.199c0-18.654,2.261-33.05,6.801-43.204    c4.523-9.6,13.329-19.729,26.402-30.404c14.404-12.254,24.798-24.124,31.198-35.601c6.127-11.204,9.199-23.723,9.199-37.598    C342.46,150.929,334.72,132.651,319.258,119.578z">
+                                                        <g>
+                                                        <g>
+                                                        <path d="M319.258,119.578c-13.858-11.981-31.718-17.98-53.581-17.98h-4.403c-22.673,0-42.001,7.074-58.001,21.197    c-17.604,15.753-26.402,36.804-26.402,63.198c0,4.275,1.203,7.603,3.601,10.001c2.398,2.15,5.325,3.072,8.798,2.799    c3.2,0,5.999-1.203,8.397-3.601c2.662-2.654,4.002-5.854,4.002-9.6c0-14.925,3.465-27.853,10.402-38.801    c10.129-15.454,26.522-23.202,49.203-23.202c19.2,0,33.724,5.197,43.597,15.599c8.26,8.55,12.527,19.601,12.8,33.203    c0,11.998-2.534,22.673-7.603,32c-5.871,10.675-16.401,22.4-31.599,35.2c-12.8,10.402-21.734,21.999-26.803,34.799    c-5.077,12.271-7.603,27.878-7.603,46.797c0,3.746,1.203,6.801,3.601,9.199c2.398,2.15,5.325,3.2,8.798,3.2    c3.2,0,5.999-1.05,8.397-3.2c2.662-2.398,4.002-5.453,4.002-9.199c0-18.654,2.261-33.05,6.801-43.204    c4.523-9.6,13.329-19.729,26.402-30.404c14.404-12.254,24.798-24.124,31.198-35.601c6.127-11.204,9.199-23.723,9.199-37.598    C342.46,150.929,334.72,132.651,319.258,119.578z">
                                                                     </path>
                                                                 </g>
                                                             </g>
-                                                            <g>
-                                                                <g>
-                                                                    <circle cx="256" cy="384" r="25.6"></circle>
+                                                        <g>
+                                                        <g>
+                                                        <circle cx="256" cy="384" r="25.6"></circle>
                                                                 </g>
                                                             </g>
                                                         </svg>
@@ -188,12 +192,12 @@
                                     </div>
                                 </div>
                             </div>
-                    }
-                    else
-                    {
+                        }
+                        else
+                        {
                             <p>Loading...</p>
-                    }
-                </div>
+                        }
+                    </div>
 
                     <div class="row">
                         <div class="row">
@@ -533,6 +537,8 @@
 
 
     </div>
+
+}
 
 
 
