@@ -1,0 +1,94 @@
+﻿@page "/admin/userList"
+@inject HttpClient Http
+@inject IJSRuntime JS
+@using Web_DongHo_WebAssembly.Data
+@using Web_DongHo_WebAssembly.Models
+@using Newtonsoft.Json
+@layout AdminLayout
+<style>
+    table thead th {
+        vertical-align: middle !important;
+    }
+</style>
+@if (listUser == null)
+{
+    <LoadingIndicator></LoadingIndicator>
+}
+else
+{
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Danh Sách Người Dùng</h3>
+                        </div>
+                        <!-- /.card-header -->
+                        <div class="card-body">
+                            <table id="example1" class="table table-bordered table-striped">
+                                <thead class="text-center">
+                                    <tr>
+                                        <th>Id</th>
+                                        <th>Tên Tài Khoản</th>
+                                        <th>Tên Người Dùng</th>
+                                        <th>Email Người Dùng</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in listUser)
+                                    {
+                                        <tr class="text-center  align-middle">
+                                            <td>@item.UserID</td>
+                                            <td>@item.UserName</td>
+                                            <td>@item.FullName</td>
+                                            <td>@item.Email</td>
+                                            <td>
+                                                @*<a class="btn btn-secondary" href="admin/editUser/@item.UserID">Chỉnh sửa</a>*@
+                                                @*<a class="btn btn-outline-danger" asp-action="Delete" asp-route-id="@item.UserId">Delete</a>*@
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- /.card-body -->
+                    </div>                <!-- /.card -->
+                </div>
+                <!-- /.col -->
+            </div>
+            <!-- /.row -->
+        </div>
+        <!-- /.container-fluid -->
+    </section>
+
+}
+
+
+@code {
+    private List<User> listUser = new List<User>();
+    protected override async Task OnInitializedAsync()
+    {
+        await GetListRole();
+    }
+    async Task GetListRole()
+    {
+        try
+        {
+            var response = await Http.GetStringAsync("api/user");
+            listUser = JsonConvert.DeserializeObject<List<User>>(response);
+            if (listUser == null)
+            {
+                await JS.InvokeVoidAsync("console.log", "Trống");
+            }
+
+        }
+        catch (Exception e)
+        {
+            await JS.InvokeVoidAsync("console.log", e.Message);
+
+        }
+
+    }
+}
