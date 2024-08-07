@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -25,7 +27,13 @@ namespace Web_DongHo_API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Brand>>> GetAllBrands()
         {
-            return await _context.Brands.ToListAsync();
+            var listBrand = await _context.Brands.ToListAsync();
+            var options = new JsonSerializerOptions
+            {
+                ReferenceHandler = ReferenceHandler.Preserve,
+                WriteIndented = true
+            };
+            return new JsonResult(listBrand, options);
         }
 
         // GET: api/Brand/5
@@ -44,28 +52,32 @@ namespace Web_DongHo_API.Controllers
 
         // PUT: api/Brand/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateBrand(int id, [FromBody] BrandVM brandVM)
+        [HttpPost("editBrand/{brandId:int}")]
+        public async Task<IActionResult> UpdateBrand(int brandId, [FromBody] BrandVM brandVM)
         {
-            if (id != brandVM.BrandId)
+            if (brandId != brandVM.BrandId)
             {
-                return BadRequest();
+                return BadRequest(new { message = "Invalid brand data." });
             }
-            var findBrand = await _context.Brands.FindAsync(id);
+            var findBrand = await _context.Brands.FirstOrDefaultAsync(c => c.BrandId == brandId);
             if (findBrand == null)
             {
-                return NotFound();
+                return NotFound(new { message = "Brand Not Found" });
             }
             findBrand.BrandName = brandVM.BrandName;
             await _context.SaveChangesAsync();
-            return NoContent();
+            return Ok(new { message = "Brand information updated successfully." });
         }
 
         // POST: api/Brand
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
+        [HttpPost("addBrand")]
         public async Task<ActionResult> CreateBrand([FromBody] BrandVM brandVM)
         {
+            if (brandVM == null || !ModelState.IsValid)
+            {
+                return BadRequest(new { message = "Invalid brand data." });
+            }
             var brand = new Brand
             {
                 BrandName = brandVM.BrandName
@@ -73,7 +85,7 @@ namespace Web_DongHo_API.Controllers
             _context.Brands.Add(brand);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetBrand", new { id = brand.BrandId }, brand);
+            return Ok(new { message = "Brand information add successfully." });
         }
 
         // DELETE: api/Brand/5
