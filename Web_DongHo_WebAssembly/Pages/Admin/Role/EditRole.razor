@@ -30,19 +30,20 @@
                             <div class="card-footer">
                                 <button type="submit" class="btn btn-outline-dark">Submit</button>
                             </div>
+                            <div class="toast-container position-fixed bottom-0 end-0 p-3">
+                                <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                                    <div class="toast-header">
+                                        <img src="/images/logo2.png" class="rounded me-2" alt="..." width="50px">
+                                        <strong class="me-auto">Thông báo</strong>
+                                    </div>
+                                    <div class="toast-body">
+                                        @toastMessage
+                                    </div>
+                                </div>
+                            </div>
                         </form>
                     </div>
-                    <div class="toast-container position-fixed bottom-0 end-0 p-3">
-                        <div class="toast fade" role="alert" aria-live="assertive" aria-atomic="true">
-                            <div class="toast-header">
-                                <strong class="me-auto">Thông báo</strong>
-                                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                            </div>
-                            <div class="toast-body">
-                                @toastMessage
-                            </div>
-                        </div>
-                    </div>
+                    
                     <!-- /.card -->
                 </div>
                 <!--/.col (left) -->
@@ -57,7 +58,7 @@
     @code {
         [Parameter]
         public int RoleId { get; set; }
-        private string toastMessage = string.Empty;
+        public string toastMessage { get; set; }
         private Role roleEdit = new Role();
         protected override async Task OnInitializedAsync()
         {
@@ -88,7 +89,8 @@
             {
                 toastMessage = "Thông tin đã được cập nhật thành công!";
                 ShowToast();
-                Navigation.NavigateTo("/admin/roleList");
+                await Task.Delay(2000);
+                await BackToAdmin();
             }
             else
             {
@@ -100,9 +102,15 @@
         private void ShowToast()
         {
             JS.InvokeVoidAsync("eval", "var toastElement = document.querySelector('.toast'); var toast = new bootstrap.Toast(toastElement); toast.show();");
+            StateHasChanged();
         }
         public class ErrorResponse
         {
             public string Message { get; set; }
+        }
+        async Task BackToAdmin()
+        {
+            Navigation.NavigateTo("/admin/roleList");
+
         }
     }

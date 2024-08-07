@@ -89,7 +89,7 @@ namespace Web_DongHo_API.Controllers
             _context.Roles.Add(role);
             await _context.SaveChangesAsync();
 
-            return Ok(new { message = "Role information updated successfully." });
+            return Ok(new { message = "Role information add successfully." });
         }
 
         // DELETE: api/Role/5

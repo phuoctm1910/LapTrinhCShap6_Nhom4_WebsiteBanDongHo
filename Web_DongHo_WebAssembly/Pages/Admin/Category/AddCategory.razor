@@ -1,0 +1,92 @@
+﻿@page "/admin/addCategory"
+@inject HttpClient Http
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+@using Web_DongHo_WebAssembly.Data
+@using Web_DongHo_WebAssembly.Models
+@using Newtonsoft.Json
+@layout AdminLayout
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- left column -->
+            <div class="col-md-12">
+                <!-- jquery validation -->
+                <div class="card card-dark">
+                    <div class="card-header">
+                        <h3 class="card-title">Điền đầy đủ thông tin</h3>
+                    </div>
+                    <!-- /.card-header -->
+                    <!-- form start -->
+                    <form @onsubmit="HandleSubmit">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label class="control-label">Tên Phong Cách:</label>
+                                <input @bind="categoryAdd.CategoryName" id="CategoryName" class="form-control" required pattern="^[A-Za-zÀ-ỹ][A-Za-zÀ-ỹ\s]*[A-Za-zÀ-ỹ]$" title="Chỉ được điền tên tiếng Việt và không kết thúc bằng dấu cách" />
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-outline-dark">Submit</button>
+                        </div>
+                        <div class="toast-container position-fixed bottom-0 end-0 p-3">
+                            <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                                <div class="toast-header">
+                                    <img src="/images/logo2.png" class="rounded me-2" alt="..." width="50px">
+                                    <strong class="me-auto">Thông báo</strong>
+                                </div>
+                                <div class="toast-body">
+                                    @toastMessage
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <!-- /.card -->
+            </div>
+            <!--/.col (left) -->
+            <!-- right column -->
+            <div class="col-md-6">
+            </div>
+            <!--/.col (right) -->
+        </div>
+        <!-- /.row -->
+    </div><!-- /.container-fluid -->
+</section>
+@code {
+    public string toastMessage { get; set; }
+    private Category categoryAdd = new Category();
+
+    async Task HandleSubmit()
+    {
+        var result = await Http.PostAsJsonAsync("api/Category/addCategory", categoryAdd);
+        if (result.IsSuccessStatusCode)
+        {
+            toastMessage = "Thêm phong cách thành công!";
+            ShowToast();
+            await Task.Delay(2000);
+            await BackToAdmin();
+        }
+        else
+        {
+            var errorResponse = await result.Content.ReadFromJsonAsync<ErrorResponse>();
+            toastMessage = errorResponse?.Message ?? "Đã xảy ra lỗi khi thêm thông tin.";
+            ShowToast();
+        }
+    }
+    private void ShowToast()
+    {
+        JS.InvokeVoidAsync("eval", "var toastElement = document.querySelector('.toast'); var toast = new bootstrap.Toast(toastElement); toast.show();");
+        StateHasChanged();
+    }
+    public class ErrorResponse
+    {
+        public string Message { get; set; }
+    }
+    async Task BackToAdmin()
+    {
+        Navigation.NavigateTo("/admin/categoryList");
+
+    }
+}
