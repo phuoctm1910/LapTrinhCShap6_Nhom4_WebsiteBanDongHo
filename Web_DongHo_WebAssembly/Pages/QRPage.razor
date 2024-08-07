@@ -1,0 +1,59 @@
+﻿@inject QRCodeService QRCodeService
+@inject IJSRuntime JS
+
+<div>
+    <h3>QR Code Generator</h3>
+    <div id="qrcode"></div>
+    <p>Discount Amount: @discountAmount VND</p>
+</div>
+
+<div>
+    <label for="totalAmount">Total Amount (VND):</label>
+    <input type="number" id="totalAmount" value="1000000" readonly />
+
+    <label for="promoCode">Promo Code:</label>
+    <input type="text" @bind="promoCode" id="promoCode" @oninput="ApplyDiscount" />
+
+    <label for="scannedDiscount">Scanned Discount Amount (VND):</label>
+    <input type="number" @bind="scannedDiscount" id="scannedDiscount" readonly />
+
+    <label for="finalAmount">Final Amount (VND):</label>
+    <input type="number" id="finalAmount" value="@FinalAmount" readonly />
+</div>
+
+@code {
+    private string qrCodeText;
+    private int discountAmount;
+    private string promoCode;
+    private int scannedDiscount;
+
+    private int TotalAmount => 1000000;
+    private int FinalAmount => TotalAmount - scannedDiscount;
+
+    protected override async Task OnInitializedAsync()
+    {
+        qrCodeText = QRCodeService.GenerateRandomString();
+        discountAmount = QRCodeService.GenerateRandomDiscount();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("generateQRCode", qrCodeText + " - " + discountAmount + " VND", "qrcode");
+        }
+    }
+
+    private void ApplyDiscount(ChangeEventArgs e)
+    {
+        promoCode = e.Value.ToString();
+        if (promoCode == qrCodeText)
+        {
+            scannedDiscount = discountAmount;
+        }
+        else
+        {
+            scannedDiscount = 0; // No discount if the promo code is incorrect
+        }
+    }
+}

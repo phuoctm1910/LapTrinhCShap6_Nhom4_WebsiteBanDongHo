@@ -24,6 +24,7 @@ namespace Web_DongHo_WebAssembly
 
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:44355/") });
             builder.Services.AddSingleton<AuthState>();
+            builder.Services.AddSingleton<QRCodeService>();
 
             await DebugDelayAsync();
             await builder.Build().RunAsync();
