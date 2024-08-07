@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -25,7 +27,13 @@ namespace Web_DongHo_API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Category>>> GetAllCategories()
         {
-            return await _context.Categories.ToListAsync();
+            var listCategory = await _context.Categories.ToListAsync();
+            var options = new JsonSerializerOptions
+            {
+                ReferenceHandler = ReferenceHandler.Preserve,
+                WriteIndented = true
+            };
+            return new JsonResult(listCategory, options);
         }
 
         // GET: api/Category/5
@@ -44,24 +52,32 @@ namespace Web_DongHo_API.Controllers
 
         // PUT: api/Category/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateCategory(int id, [FromBody] CategoryVM categoryVM)
+        [HttpPost("editCategory/{categortId:int}")]
+        public async Task<IActionResult> UpdateCategory(int categortId, [FromBody] CategoryVM categoryVM)
         {
-            var findCategory = await _context.Categories.FindAsync(id);
+            if (categortId != categoryVM.CategoryID)
+            {
+                return BadRequest(new { message = "Invalid category data." });
+            }
+            var findCategory = await _context.Categories.FirstOrDefaultAsync(c => c.CategoryId == categortId);
             if (findCategory == null)
             {
-                return NotFound();
+                return NotFound(new { message = "Category Not Found" });
             }
             findCategory.CategoryName = categoryVM.CategoryName;
             await _context.SaveChangesAsync();
-            return NoContent();
+            return Ok(new { message = "Category information updated successfully." });
         }
 
         // POST: api/Category
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost("postCategory")]
+        [HttpPost("addCategory")]
         public async Task<ActionResult> CreateCategory([FromBody] CategoryVM categoryVM)
         {
+            if (categoryVM == null || !ModelState.IsValid)
+            {
+                return BadRequest(new { message = "Invalid category data." });
+            }
             var category = new Category
             {
                 CategoryName = categoryVM.CategoryName
@@ -69,7 +85,7 @@ namespace Web_DongHo_API.Controllers
             _context.Categories.Add(category);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetAllCategories", new { id = category.CategoryId }, category);
+            return Ok(new { message = "Category information add successfully." });
         }
 
         // DELETE: api/Category/5
