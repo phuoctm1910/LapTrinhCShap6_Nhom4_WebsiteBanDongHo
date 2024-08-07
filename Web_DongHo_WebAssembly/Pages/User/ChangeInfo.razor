@@ -159,7 +159,7 @@
         </div>
         <div class="input-group">
             <label for="FullName">Họ và Tên:</label>
-            <input @bind="User.FullName" type="text" class="form-control" required pattern="[A-Za-zÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂÂÊÔưăâêô\s]+" title="Chỉ được điền tên tiếng Việt và dấu cách" />
+            <input @bind="User.FullName" type="text" class="form-control" required pattern="^[A-Za-zÀ-ỹ][A-Za-zÀ-ỹ\s]*[A-Za-zÀ-ỹ]$" title="Chỉ được điền tên tiếng Việt và không kết thúc bằng dấu cách" />
         </div>
         <div class="input-group">
             <label for="PhoneNumber">Số điện thoại:</label>
