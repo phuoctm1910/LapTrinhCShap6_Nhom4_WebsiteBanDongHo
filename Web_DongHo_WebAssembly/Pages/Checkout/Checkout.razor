@@ -177,7 +177,7 @@
                            !string.IsNullOrEmpty(orderModel.Phone) &&
                            !string.IsNullOrEmpty(orderModel.Address);
 
-        if (isFormValid && orderModel.PaymentMethod == Paypal)
+        if ( orderModel.PaymentMethod == Paypal)
         {
             JSRuntime.InvokeVoidAsync("showPayPalButton");
             PayPalPayment(checkout.TotalAmount);

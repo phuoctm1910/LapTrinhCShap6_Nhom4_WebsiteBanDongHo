@@ -153,11 +153,9 @@
             var result = await response.Content.ReadFromJsonAsync<Login_RegistrationResponse>();
             if (result != null)
             {
-                // Store the JWT token in local storage
                 await JS.InvokeVoidAsync("localStorage.setItem", "authToken", result.Token);
 
-                // Navigate to the home page or another protected page
-                Navigation.NavigateTo("/");
+                Navigation.NavigateTo($"/authentication?token={result.Token}");
             }
         }
         else
