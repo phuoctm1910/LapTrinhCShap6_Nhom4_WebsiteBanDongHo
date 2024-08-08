@@ -81,12 +81,24 @@
                     </a>
                 </li>
             </ul>
+            <div class="toast-container position-fixed top-0 end-0 p-3">
+                <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="toast-header">
+                        <img src="/images/logo2.png" class="rounded me-2" alt="..." width="50px">
+                        <strong class="me-auto">Thông báo</strong>
+                    </div>
+                    <div class="toast-body">
+                        @toastMessage
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </nav>
 
 @code {
     private string NavbarClass = "sticky-top";
+    private string toastMessage;
 
     protected override async Task OnInitializedAsync()
     {
@@ -118,18 +130,21 @@
     {
         if (!AuthState.IsLoggedIn)
         {
-            bool isConfirmed = await JS.InvokeAsync<bool>("confirm", "Bạn chưa đăng nhập. Bạn có muốn đăng nhập?");
-            if (isConfirmed)
-            {
-                Navigation.NavigateTo("/login");
-            }
+            toastMessage = "Bạn chưa đăng nhập, bạn sẽ được chuyển đến đăng nhập sau ít giây!";
+            ShowToast();
+            await Task.Delay(2000);
+            Navigation.NavigateTo("/login");
         }
         else
         {
             Navigation.NavigateTo("/giohang");
         }
     }
-
+    private void ShowToast()
+    {
+        JS.InvokeVoidAsync("eval", "var toastElement = document.querySelector('.toast'); var toast = new bootstrap.Toast(toastElement); toast.show();");
+        StateHasChanged();
+    }
     private async Task UpdateCartItemCount()
     {
         if (AuthState.IsLoggedIn)

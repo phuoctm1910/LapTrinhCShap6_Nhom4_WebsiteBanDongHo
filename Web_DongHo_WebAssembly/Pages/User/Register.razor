@@ -257,7 +257,7 @@
             ShowToast();
             await JS.InvokeVoidAsync("localStorage.setItem", "authToken", loginRequest.Token);
             // Ví dụ điều hướng
-            Navigation.NavigateTo("/Home");
+            Navigation.NavigateTo($"/authentication?token={loginRequest.Token}");
         }
         else
         {

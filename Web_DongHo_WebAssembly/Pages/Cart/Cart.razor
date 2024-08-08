@@ -137,7 +137,9 @@
                     cart = JsonConvert.DeserializeObject<Bill>(responseContent);
                     if (cart == null)
                     {
-                        await JS.InvokeVoidAsync("alert", "Bạn chưa có sản phẩm nào trong giỏ hàng");
+                        toastMessage = "Bạn chưa có sản phẩm nào trong giỏ hàng";
+                        await Task.Delay(100);
+                        ShowToast();
                     }
                     else
                     {
@@ -193,7 +195,7 @@
         if (promoCode == qrCodeText)
         {
             scannedDiscount = discountAmount;
-            toastMessage = $"Bạn được giảm {scannedDiscount} VND!";
+            toastMessage = $"Bạn được giảm {scannedDiscount.ToString("N0")} ₫!";
             ShowToast();
             Task.Delay(1000);
             CalculateTotalAmount();

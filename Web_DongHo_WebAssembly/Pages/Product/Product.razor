@@ -402,12 +402,24 @@ else
                 <button class="btnMore fill" id="btnShowLess" style="display:none;">Ẩn Bớt <i class="fa-solid fa-minus"></i></button>
             </div>
         }
+        <div class="toast-container position-fixed top-0 end-0 p-3">
+            <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header">
+                    <img src="/images/logo2.png" class="rounded me-2" alt="..." width="50px">
+                    <strong class="me-auto">Thông báo</strong>
+                </div>
+                <div class="toast-body">
+                    @toastMessage
+                </div>
+            </div>
+        </div>
     </div>
 
 }
 
 @code {
     private List<Web_DongHo_WebAssembly.Data.Product> products;
+    private string toastMessage { get; set; }
     protected override async Task OnInitializedAsync()
     {
         try
@@ -429,12 +441,10 @@ else
     {
         if (string.IsNullOrEmpty(username))
         {
-            bool isConfirmed = await JS.InvokeAsync<bool>("confirm", "Bạn chưa đăng nhập. Bạn có muốn đăng nhập không?");
-
-            if (isConfirmed)
-            {
-                Navigation.NavigateTo("/login");
-            }
+            toastMessage = "Bạn chưa đăng nhập, bạn sẽ được chuyển đến đăng nhập sau ít giây!";
+            ShowToast();
+            await Task.Delay(3000);
+            Navigation.NavigateTo("/login");
         }
         else
         {
@@ -465,6 +475,12 @@ else
                 await JS.InvokeVoidAsync("console.log", $"Error adding product to cart: {ex.Message}");
             }
         }
+    }
+
+    private void ShowToast()
+    {
+        JS.InvokeVoidAsync("eval", "var toastElement = document.querySelector('.toast'); var toast = new bootstrap.Toast(toastElement); toast.show();");
+        StateHasChanged();
     }
 
     private async Task UpdateCartItemCount()

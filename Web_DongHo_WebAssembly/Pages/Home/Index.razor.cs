@@ -29,9 +29,27 @@ namespace Web_DongHo_WebAssembly.Pages.Home
 
         private HomeProductRequest homeProductRequest = new HomeProductRequest();
 
+        private string toastMessage { get; set; }
+
         protected override async Task OnInitializedAsync()
         {
             await GetProduct();
+        }
+
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            if (firstRender && Auth.IsLoggedIn)
+            {
+                await HandleToastMessage($"Chào mừng người dùng {Auth.Username} đã đăng nhập <3");
+
+                await Task.Delay(100);
+                ShowToast();
+            }
+        }
+        private async Task HandleToastMessage(string message)
+        {
+            toastMessage = message;
+            StateHasChanged();
         }
         public async Task GetProduct()
         {
@@ -60,12 +78,10 @@ namespace Web_DongHo_WebAssembly.Pages.Home
         {
             if (string.IsNullOrEmpty(username))
             {
-                bool isConfirmed = await JS.InvokeAsync<bool>("confirm", "Bạn chưa đăng nhập. Bạn có muốn đăng nhập không?");
-
-                if (isConfirmed)
-                {
-                    Navigation.NavigateTo("/login");
-                }
+                await HandleToastMessage("Bạn chưa đăng nhập, bạn sẽ được chuyển đến đăng nhập sau ít giây!");
+                ShowToast();
+                await Task.Delay(3000);
+                Navigation.NavigateTo("/login");
             }
             else
             {
@@ -112,6 +128,11 @@ namespace Web_DongHo_WebAssembly.Pages.Home
             }
         }
 
+        private void ShowToast()
+        {
+            JS.InvokeVoidAsync("eval", "var toastElement = document.querySelector('.toast'); var toast = new bootstrap.Toast(toastElement); toast.show();");
+            StateHasChanged();
+        }
     }
     public class AddToCartRequest
     {

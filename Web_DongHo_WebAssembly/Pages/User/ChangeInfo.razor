@@ -226,7 +226,7 @@
 
     private async Task HandleSubmit()
     {
-        var response = await http.PostAsJsonAsync("api/Account/ChangeInfo", User);
+        var response = await http.PostAsJsonAsync("api/Account/change-info", User);
         if (response.IsSuccessStatusCode)
         {
             toastMessage = "Thông tin đã được cập nhật thành công!";
