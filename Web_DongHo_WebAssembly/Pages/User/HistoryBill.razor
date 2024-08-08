@@ -1,0 +1,209 @@
+﻿@page "/historyBill"
+@inject HttpClient Http
+@inject IJSRuntime JS
+@inject AuthState Auth
+@inject NavigationManager Navigation
+@using Web_DongHo_WebAssembly.Data
+@using Web_DongHo_WebAssembly.Models
+@using Newtonsoft.Json
+<div class="container" style="background-color: white;width: calc(100% - 300px) !important;">
+
+    <table class="table table-bordered table-striped table-hover">
+        <thead class="text-center align-middle">
+            <tr>
+                <th>Tên người nhận</th>
+                <th>Số điện thoại người nhận</th>
+                <th>Địa chỉ người nhận</th>
+                <th>Tổng số lượng</th>
+                <th>Tổng tiền thanh toán</th>
+                <th>Phương thức thanh toán</th>
+                <th>Trạng thái</th>
+                <th>Kiểu vận chuyển</th>
+                <th>Chức năng</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var bill in listBill)
+            {
+                <tr class="text-center align-middle">
+                    <td>@bill.RecipientName</td>
+                    <td>@bill.RecipientPhoneNumber</td>
+                    <td>@bill.RecipientAddress</td>
+                    <td>@bill.Quantity</td>
+                    <td>@bill.TotalAmount.ToString("#,##0").Replace(",", ".") ₫</td>
+                    <td>@bill.PaymentMethod</td>
+                    <td>@bill.Status</td>
+                    <td>@bill.Status</td>
+                    <td>@bill.DeliveryType</td>
+
+                    <td>
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#detailsModal" @onclick="() => ShowBillDetails(bill.BillId, bill.UserID)">Xem chi tiết</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <!-- Modal -->
+    <div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="detailsModalLabel">Chi tiết hóa đơn</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="accordion" id="accordionExample">
+                        @if (listBillDetails != null)
+                        {
+                            @foreach (var details in listBillDetails)
+                            {
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="heading{@details.ProductId}">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{@details.ProductId}" aria-controls="collapse{@details.ProductId}">
+                                            Sản Phẩm: @details.ProductName
+                                        </button>
+                                    </h2>
+                                    <div id="collapse{@details.ProductId}" class="accordion-collapse collapse show" aria-labelledby="heading{@details.ProductId}" data-bs-parent="#accordionExample">
+                                        <div class="accordion-body">
+                                            <p>Số lượng mua: @details.Quantity</p>
+                                            <p>Đơn giá: @details.UnitPrice.ToString("#,##0").Replace(",", ".") ₫</p>
+                                            <p>Tổng tiền sản phẩm: @details.TotalPrice.ToString("#,##0").Replace(",", ".") ₫</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+
+                        }
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div class="toast fade" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <strong class="me-auto">Thông báo</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                @toastMessage
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<BillDetailOfUser> listBill = new List<BillDetailOfUser>();
+    private List<BillDetailsRequest> listBillDetails = new List<BillDetailsRequest>();
+    private string toastMessage = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUserBill();
+    }
+    async Task LoadUserBill()
+    {
+        try
+        {
+            var username = Auth.Username;
+            if (username != null)
+            {
+                var response = await Http.GetAsync($"api/billofuser/historyBill?username={username}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    listBill = JsonConvert.DeserializeObject<List<BillDetailOfUser>>(responseContent);
+                    if (listBill == null)
+                    {
+                        toastMessage = "Không có đơn thanh toán đã hoàn thành";
+                        ShowToast();
+                    }
+                }
+                else
+                {
+                    var errorMessage = await response.Content.ReadAsStringAsync();
+                    await JS.InvokeVoidAsync("console.log", $"Error: {errorMessage}");
+                }
+            }
+            else
+            {
+                Navigation.NavigateTo("/");
+
+            }
+        }
+        catch (Exception ex)
+        {
+            await JS.InvokeVoidAsync("alert", $"An error occurred: {ex.Message}");
+        }
+    }
+    private async Task loadBillDetails(int billId, int userId)
+    {
+        try
+        {
+            var response = await Http.GetAsync($"api/billofuser/historyBillDetail/{billId}?userId={userId}");
+            if (response.IsSuccessStatusCode)
+            {
+                var responseString = await response.Content.ReadAsStringAsync();
+                listBillDetails = JsonConvert.DeserializeObject<List<BillDetailsRequest>>(responseString);
+                if (listBillDetails == null || !listBillDetails.Any())
+                {
+                    await JS.InvokeVoidAsync("console.log", "Trống");
+                }
+            }
+            else
+            {
+                await JS.InvokeVoidAsync("console.log", $"Error: {response.ReasonPhrase}");
+            }
+        }
+        catch (Exception e)
+        {
+            await JS.InvokeVoidAsync("console.log", e.Message);
+        }
+    }
+
+    private async Task ShowBillDetails(int billId, int userId)
+    {
+        await loadBillDetails(billId, userId);
+        await JS.InvokeVoidAsync("eval", "$('#detailsModal').modal('show');");
+    }
+
+    private void ShowToast()
+    {
+        // Xem này như 1 javascript
+        JS.InvokeVoidAsync("eval", "var toastElement = document.querySelector('.toast'); var toast = new bootstrap.Toast(toastElement); toast.show();");
+    }
+    public class BillDetailOfUser
+    {
+        public int BillId { get; set; }
+        public int UserID { get; set; }
+        public string UserName { get; set; }
+        public int Quantity { get; set; }
+        public float TotalAmount { get; set; }
+        public string Status { get; set; }
+        public string RecipientName { get; set; }
+        public string RecipientPhoneNumber { get; set; }
+        public string RecipientAddress { get; set; }
+        public string PaymentMethod { get; set; }
+        public string DeliveryType { get; set; }
+    }
+    public class BillDetailsRequest
+    {
+        public int ProductId { get; set; }
+        public string ProductName { get; set; }
+        public float UnitPrice { get; set; }
+        public int Quantity { get; set; }
+        public float TotalPrice { get; set; }
+    }
+    public class ErrorResponse
+    {
+        public string Message { get; set; }
+    }
+
+}
