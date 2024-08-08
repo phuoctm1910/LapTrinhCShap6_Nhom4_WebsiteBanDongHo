@@ -1,0 +1,162 @@
+﻿@page "/admin/billList"
+@inject HttpClient Http
+@inject IJSRuntime JS
+@using Web_DongHo_WebAssembly.Data
+@using Web_DongHo_WebAssembly.Models
+@using Newtonsoft.Json
+@layout AdminLayout
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Danh Sách Đơn Hàng</h3>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body">
+                        <table id="example1" class="table table-bordered table-striped">
+                            <thead class="text-center">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Tên Khách Hàng</th>
+                                    <th>Số Lượng Trong Đơn Hàng</th>
+                                    <th>Tổng Tiền Đơn Hàng</th>
+                                    <th>Trạng Thái</th>
+                                    <th>Hành Động</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in listBill)
+                                {
+                                    <tr class="text-center align-middle">
+                                        <td>@item.BillId</td>
+                                        <td>@item.User.FullName</td>
+                                        <td>@item.Quantity</td>
+                                        <td>@item.TotalAmount.ToString("#,##0").Replace(",", ".") ₫</td>
+                                        <td>@item.Status</td>
+                                        <td>
+                                            <button type="button" class="btn btn-secondary d-inline p-2" @onclick="() => ShowBillDetails(item.BillId, item.UserID)">Xem Chi Tiết</button>                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.col -->
+        </div>
+        <!-- /.row -->
+    </div>
+    <!-- /.container-fluid -->
+</section>
+<!-- Modal chi tiết hóa đơn  -->
+<div class="modal fade" id="billDetailsModal" tabindex="-1" aria-labelledby="billDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="billDetailsModalLabel">Chi tiết hóa đơn</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-bordered table-striped table-hover">
+                    <thead class="text-center align-middle">
+                        <tr>
+                            <th>Người dùng</th>
+                            <th>Tên người nhận</th>
+                            <th>Số điện thoại người nhận</th>
+                            <th>Địa chỉ người nhận</th>
+                            <th>Tổng số lượng</th>
+                            <th>Tổng tiền thanh toán</th>
+                            <th>Phương thức thanh toán</th>
+                            <th>Trạng thái</th>
+                            <th>Kiểu vận chuyển</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="text-center align-middle">
+                            <td>@billDetail.UserName</td>
+                            <td>@billDetail.RecipientName</td>
+                            <td>@billDetail.RecipientPhoneNumber</td>
+                            <td>@billDetail.RecipientAddress</td>
+                            <td>@billDetail.Quantity</td>
+                            <td>@billDetail.TotalAmount.ToString("#,##0").Replace(",", ".") ₫</td>
+                            <td>@billDetail.PaymentMethod</td>
+                            <td>@billDetail.Status</td>
+                            <td>@billDetail.DeliveryType</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<Bill> listBill = new List<Bill>();
+    private BillDetailOfUser billDetail = new BillDetailOfUser();
+    protected override async Task OnInitializedAsync()
+    {
+        await GetListBill();
+    }
+    async Task GetListBill()
+    {
+        try
+        {
+            var response = await Http.GetStringAsync("api/Bill");
+            listBill = JsonConvert.DeserializeObject<List<Bill>>(response);
+            if (listBill == null)
+            {
+                await JS.InvokeVoidAsync("console.log", "Trống");
+            }
+
+        }
+        catch (Exception e)
+        {
+            await JS.InvokeVoidAsync("console.log", e.Message);
+
+        }
+    }
+
+
+    private async Task loadBillDetails(int billId, int userId)
+    {
+        try
+        {
+            var response = await Http.GetStringAsync($"api/Bill/GetBillDetail/{billId}?userId={userId}");
+            billDetail = JsonConvert.DeserializeObject<BillDetailOfUser>(response);
+            if (listBill == null)
+            {
+                await JS.InvokeVoidAsync("console.log", "Trống");
+            }
+
+        }
+        catch (Exception e)
+        {
+            await JS.InvokeVoidAsync("console.log", e.Message);
+
+        }
+    }
+    private async Task ShowBillDetails(int billId, int userId)
+    {
+        await loadBillDetails(billId, userId);
+        await JS.InvokeVoidAsync("eval", "$('#billDetailsModal').modal('show');");
+    }
+    public class BillDetailOfUser
+    {
+        public int BillId { get; set; }
+        public int UserID { get; set; }
+        public string UserName { get; set; }
+        public int Quantity { get; set; }
+        public float TotalAmount { get; set; }
+        public string Status { get; set; }
+        public string RecipientName { get; set; }
+        public string RecipientPhoneNumber { get; set; }
+        public string RecipientAddress { get; set; }
+        public string PaymentMethod { get; set; }
+        public string DeliveryType { get; set; }
+    }
+}

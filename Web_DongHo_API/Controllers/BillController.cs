@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -28,23 +30,46 @@ namespace Web_DongHo_API.Controllers
             var bills = await _context.Bills
                 .Include(b => b.User)
                 .OrderBy(b => b.BillId)
+                .Where(c => c.Status == "Completed")
                 .ToListAsync();
-            return Ok(bills);
+            var options = new JsonSerializerOptions
+            {
+                ReferenceHandler = ReferenceHandler.Preserve,
+                WriteIndented = true
+            };
+            return new JsonResult(bills, options);
         }
-        // GET: api/Bill/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Bill>> GetBillById(int id)
+        [HttpGet("GetBillDetail/{billId:int}")]
+        public async Task<IActionResult> GetBillDetail(int billId, [FromQuery] int userId)
         {
-            var bill = await _context.Bills
-                .Include(b => b.User)
-                .FirstOrDefaultAsync(b => b.BillId == id);
+            var totalAllUnit = await _context.BillDetails
+                                .Where(bd => bd.BillId == billId)
+                                .SumAsync(bd => bd.TotalPrice);
 
-            if (bill == null)
+            var billDetail = await _context.Bills
+                .Where(b => b.BillId == billId && b.UserID == userId)
+                .Select(b => new
+                {
+                    b.BillId,
+                    b.UserID,
+                    UserName = b.User.FullName,
+                    b.Quantity,
+                    b.TotalAmount,
+                    b.Status,
+                    b.RecipientName,
+                    b.RecipientPhoneNumber,
+                    b.RecipientAddress,
+                    b.PaymentMethod,
+                    DeliveryType = (b.TotalAmount - totalAllUnit == 15000) ? "Vận chuyển chậm" : "Vận chuyển Nhanh"
+                })
+                .FirstOrDefaultAsync();
+
+            if (billDetail == null)
             {
                 return NotFound();
             }
 
-            return Ok(bill);
+            return Ok(billDetail);
         }
 
         // PUT: api/Bill/5
