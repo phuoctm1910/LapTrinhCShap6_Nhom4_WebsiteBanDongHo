@@ -30,51 +30,61 @@ namespace Web_DongHo_API.Controllers
         }
         [HttpGet]
         [Route("historyBill")]
-        public async Task<IActionResult> HistoryBill([FromBody] HistoryBillRequest request)
+        public async Task<IActionResult> HistoryBill([FromQuery] string username)
         {
-            if (string.IsNullOrEmpty(request.UserName))
+            if (string.IsNullOrEmpty(username))
             {
-                return BadRequest(new { success = false, message = "Người dùng chưa đăng nhập." });
+                return BadRequest(new { message = "Người dùng chưa đăng nhập." });
             }
 
-            var findUser = await _context.Users.FirstOrDefaultAsync(u => u.UserName == request.UserName);
+            var findUser = await _context.Users.FirstOrDefaultAsync(u => u.UserName == username);
             if (findUser == null)
             {
-                return NotFound(new { success = false, message = "Không tìm thấy người dùng." });
+                return NotFound(new { message = "Không tìm thấy người dùng." });
             }
 
             var completedBills = await _context.Bills
-                .Where(b => b.UserID == findUser.UserID && b.Status.ToLower() == "completed")
+                .Where(b => b.UserID == findUser.UserID && b.Status == "Completed")
                 .ToListAsync();
 
             if (!completedBills.Any())
             {
-                return Ok(new { success = true, message = "Không có hóa đơn nào hoàn thành.", bills = new List<Bill>() });
+                return Ok(new { message = "Không có hóa đơn nào hoàn thành.", bills = new List<Bill>() });
             }
 
             var totalAllUnit = await _context.BillDetails
                 .Where(bd => completedBills.Select(b => b.BillId).Contains(bd.BillId))
                 .SumAsync(bd => bd.TotalPrice);
 
-            return Ok(new { success = true, bills = completedBills, totalAllUnit });
+            var result = completedBills.Select(b => new
+            {
+                b.BillId,
+                b.UserID,
+                UserName = b.User.FullName,
+                b.Quantity,
+                b.TotalAmount,
+                b.Status,
+                b.RecipientName,
+                b.RecipientPhoneNumber,
+                b.RecipientAddress,
+                b.PaymentMethod,
+                DeliveryType = (b.TotalAmount - totalAllUnit == 15000) ? "Vận chuyển chậm" : "Vận chuyển Nhanh"
+            }).ToList();
+
+            return Ok(result);
         }
         [HttpGet]
-        [Route("historyBillDetail")]
-        public async Task<IActionResult> HistoryBillDetails([FromBody] HistoryBillDetailsRequest request)
+        [Route("historyBillDetail/{billId:int}")]
+        public async Task<IActionResult> HistoryBillDetails(int billId, [FromQuery] int userId)
         {
-            if (string.IsNullOrEmpty(request.UserName))
-            {
-                return BadRequest(new { success = false, message = "Người dùng chưa đăng nhập." });
-            }
 
-            var findUser = await _context.Users.FirstOrDefaultAsync(u => u.UserName == request.UserName);
-            if (findUser == null)
+            if (userId == null)
             {
-                return NotFound(new { success = false, message = "Không tìm thấy người dùng." });
+                return NotFound(new {message = "Không tìm thấy người dùng." });
             }
 
             var billDetails = await _context.BillDetails
-                .Where(bd => bd.BillId == request.BillId && bd.Bill.UserID == findUser.UserID)
+                .Where(bd => bd.BillId == billId && bd.Bill.UserID == userId)
                 .Include(bd => bd.Product)
                 .GroupBy(bd => new { bd.ProductId, bd.Product.ProductName, bd.UnitPrice })
                 .Select(g => new
@@ -89,10 +99,10 @@ namespace Web_DongHo_API.Controllers
 
             if (!billDetails.Any())
             {
-                return NotFound(new { success = false, message = "Không tìm thấy thông tin chi tiết của bill này." });
+                return NotFound(new { message = "Không tìm thấy thông tin chi tiết của bill này." });
             }
 
-            return Ok(new { success = true, billDetails });
+            return Ok(billDetails);
         }
     }
 }
