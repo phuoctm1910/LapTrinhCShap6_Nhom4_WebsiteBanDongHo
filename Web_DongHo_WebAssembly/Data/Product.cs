@@ -59,7 +59,15 @@ namespace Web_DongHo_WebAssembly.Data
             }
             set
             {
-                ProductImages = JsonConvert.SerializeObject(value);
+                if (value == null || value.Count == 0)
+                {
+                    ProductImages = null;
+                }
+                else
+                {
+                    var serializedImages = JsonConvert.SerializeObject(value);
+                    ProductImages = serializedImages.Replace("\"", "\\\"");
+                }
             }
         }
     }

@@ -1,0 +1,340 @@
+﻿@page "/admin/editProduct/{ProductId:int}"
+@inject HttpClient Http
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+@using Web_DongHo_WebAssembly.Data
+@using Web_DongHo_WebAssembly.Models
+@using Newtonsoft.Json
+@layout AdminLayout
+
+<h3>Edit Product</h3>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card card-dark">
+                <div class="card-header">
+                    <h3 class="card-title">Điền đầy đủ thông tin</h3>
+                </div>
+                <div class="card-body">
+                    <EditForm Model="@productDetail" OnSubmit="HandleValidSubmit">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
+
+                        <input type="hidden" @bind="productDetail.ProductId" />
+
+                        <div class="form-group">
+                            <label class="control-label">Mã Sản Phẩm:</label>
+                            <div class="input-group mb-3">
+                                <InputText @bind-Value="productDetail.ProductCode" class="form-control" required />
+                                <ValidationMessage For="@(() => productDetail.ProductCode)" />
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label">Tên Sản Phâm:</label>
+                            <div class="input-group mb-3">
+                                <InputText @bind-Value="productDetail.ProductName" class="form-control" required  />
+                                <ValidationMessage For="@(() => productDetail.ProductName)" />
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label">Ảnh Sản Phẩm:</label>
+                            <InputFile OnChange="HandleSelectedFiles" multiple />
+                            <ValidationMessage For="@(() => selectedImages)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label">Số lượng Sản Phẩm:</label>
+                            <div class="input-group mb-3">
+                                <InputNumber @bind-Value="productDetail.ProductStock" class="form-control" required />
+                                <ValidationMessage For="@(() => productDetail.ProductStock)" />
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label">Giá Sản Phẩm:</label>
+                            <div class="input-group mb-3">
+                                <InputNumber @bind-Value="productDetail.ProductPrice" class="form-control" required />
+                                <ValidationMessage For="@(() => productDetail.ProductPrice)" />
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label">Loại đồng hồ dành cho:</label>
+                            <div class="input-group mb-3">
+                                <InputSelect @bind-Value="productDetail.CategoryId" class="form-control">
+                                    <option value="-1">Dành cho</option>
+                                    @foreach (var category in listCategory)
+                                    {
+                                        <option value="@category.CategoryId">@category.CategoryName</option>
+                                    }
+                                </InputSelect>
+                                <ValidationMessage For="@(() => productDetail.CategoryId)" />
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label">Thương hiệu đồng hồ:</label>
+                            <div class="input-group mb-3">
+                                <InputSelect @bind-Value="productDetail.BrandId" class="form-control">
+                                    <option value="-1">Chọn thương hiệu</option>
+                                    @foreach (var brand in listBrand)
+                                    {
+                                        <option value="@brand.BrandId">@brand.BrandName</option>
+                                    }
+                                </InputSelect>
+                                <ValidationMessage For="@(() => productDetail.BrandId)" />
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="button" class="btn btn-outline-dark" @onclick="ShowModal">Sửa thông tin chi tiết</button>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Ảnh đã chọn</label>
+                            <ul style="list-style: none; padding: 0;">
+                                @foreach (var image in selectedImages)
+                                {
+                                    <li class="mx-3 my-2 p-2 text-center" style="display: inline-block;">
+                                        <img src="@image" alt="Image" width="70" height="70" style="display: block;" />
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Ảnh hiện tại (Chọn ảnh để xóa)</label>
+                            <ul style="list-style: none; padding: 0;">
+                                @foreach (var image in productDetail.ProductImageList)
+                                {
+                                    <li class="mx-3 my-2 p-2 text-center" style="display: inline-block;">
+                                        <input type="checkbox" @onchange="(e) => OnImageCheckboxChanged(e, image)" />
+                                        <img src="images/Product/@image" alt="@image" width="70" height="70" style="display: block;" />
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-outline-dark">Xác nhận</button>
+                        </div>
+
+                        <!-- Modal for editing additional product details -->
+                        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="exampleModalLabel">Chỉnh sửa thông tin chi tiết</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <!-- Detailed Information Form Fields -->
+                                        <div class="mb-3">
+                                            <label for="Origin" class="col-form-label">Xuất xứ:</label>
+                                            <InputText @bind-Value="productDetail.Origin" class="form-control" required pattern="^[A-Za-z\s]+$" />
+                                            <ValidationMessage For="@(() => productDetail.Origin)" />
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="MachineType" class="col-form-label">Loại máy:</label>
+                                            <InputSelect @bind-Value="productDetail.MachineType" class="form-control" required>
+                                                <option value="-1" disabled selected>Chọn loại máy</option>
+                                                <option value="Pin (Quartz)">Pin (Quartz)</option>
+                                                <option value="Cơ tự động (Automatic)">Cơ tự động (Automatic)</option>
+                                                <option value="Năng lượng ánh sáng (Eco-Drive)">Năng lượng ánh sáng (Eco-Drive)</option>
+                                            </InputSelect>
+                                            <ValidationMessage For="@(() => productDetail.MachineType)" />
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="Diameter" class="col-form-label">Đường kính:</label>
+                                            <InputNumber @bind-Value="productDetail.Diameter" class="form-control" />
+                                            <span class="input-group-text">mm</span>
+                                            <ValidationMessage For="@(() => productDetail.Diameter)" />
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="ClockType" class="col-form-label">Loại đồng hồ:</label>
+                                            <InputSelect @bind-Value="productDetail.ClockType" class="form-control" required>
+                                                <option value="-1" disabled selected>Chọn loại đồng hồ</option>
+                                                <option value="Dauphine">Dauphine</option>
+                                                <option value="Baton">Baton</option>
+                                                <option value="Leaf">Leaf</option>
+                                                <option value="Alpha">Alpha</option>
+                                                <option value="Stick">Stick</option>
+                                                <option value="Arrow">Arrow</option>
+                                                <option value="Sword">Sword</option>
+                                            </InputSelect>
+                                            <ValidationMessage For="@(() => productDetail.ClockType)" />
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="Insurrance" class="col-form-label">Bảo hành:</label>
+                                            <InputNumber @bind-Value="productDetail.Insurrance" class="form-control" />
+                                            <span class="input-group-text">năm</span>
+                                            <ValidationMessage For="@(() => productDetail.Insurrance)" />
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="Color" class="col-form-label">Màu mặt số:</label>
+                                            <InputSelect class="form-control" id="colorList" @bind-Value="productDetail.Color" required>
+                                                <option value="-1" disabled selected>Chọn loại màu sắc</option>
+                                                <option value="Red">Red</option>
+                                                <option value="Green">Green</option>
+                                                <option value="Blue">Blue</option>
+                                                <option value="Yellow">Yellow</option>
+                                                <option value="Black">Black</option>
+                                                <option value="White">White</option>
+                                                <option value="Orange">Orange</option>
+                                                <option value="Purple">Purple</option>
+                                                <option value="Pink">Pink</option>
+                                                <option value="Brown">Brown</option>
+                                                <option value="Gray">Gray</option>
+                                            </InputSelect>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                                        <button type="button" class="btn btn-primary" @onclick="CloseModal">Lưu</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int ProductId { get; set; }
+    private ProductVM productDetail = new ProductVM();
+    private List<Category> listCategory = new();
+    private List<Brand> listBrand = new();
+    private List<string> selectedImages = new();
+    private List<string> selectedImagesToRemove = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetListCategory();
+        await GetListBrand();
+        await LoadProductDetails();
+    }
+
+    private async Task LoadProductDetails()
+    {
+        try
+        {
+            var response = await Http.GetStringAsync($"api/ProductDetail/GetProductDetail/{ProductId}");
+            productDetail = JsonConvert.DeserializeObject<ProductVM>(response);
+            if (productDetail == null)
+            {
+                await JS.InvokeVoidAsync("console.log", "Trống");
+            }
+        }
+        catch (Exception e)
+        {
+            await JS.InvokeVoidAsync("console.log", e.Message);
+        }
+    }
+
+    async Task GetListBrand()
+    {
+        try
+        {
+            var response = await Http.GetStringAsync("api/brand");
+            listBrand = JsonConvert.DeserializeObject<List<Brand>>(response);
+            if (listBrand == null)
+            {
+                await JS.InvokeVoidAsync("console.log", "Trống");
+            }
+        }
+        catch (Exception e)
+        {
+            await JS.InvokeVoidAsync("console.log", e.Message);
+        }
+    }
+
+    async Task GetListCategory()
+    {
+        try
+        {
+            var response = await Http.GetStringAsync("api/Category");
+            listCategory = JsonConvert.DeserializeObject<List<Category>>(response);
+            if (listCategory == null)
+            {
+                await JS.InvokeVoidAsync("console.log", "Trống");
+            }
+        }
+        catch (Exception e)
+        {
+            await JS.InvokeVoidAsync("console.log", e.Message);
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        // Remove selected images
+        productDetail.ProductImageList = productDetail.ProductImageList
+            .Except(selectedImagesToRemove)
+            .ToList();
+
+        // Prepare and send PUT request to update product details
+        var response = await Http.PutAsJsonAsync($"api/Product/EditDetail/{ProductId}", productDetail);
+
+        if (response.IsSuccessStatusCode)
+        {
+            await JS.InvokeVoidAsync("alert", "Product details updated successfully.");
+            Navigation.NavigateTo("/admin/productList"); // Redirect to the product list after saving
+        }
+        else
+        {
+            await JS.InvokeVoidAsync("alert", "Failed to update product details.");
+        }
+    }
+
+
+    private async Task HandleSelectedFiles(InputFileChangeEventArgs e)
+    {
+        selectedImages.Clear();
+
+        foreach (var file in e.GetMultipleFiles())
+        {
+            using var stream = file.OpenReadStream(maxAllowedSize: 1024 * 1024 * 15); // 15 MB max size
+            var buffer = new byte[file.Size];
+            await stream.ReadAsync(buffer, 0, (int)file.Size);
+
+            var base64String = Convert.ToBase64String(buffer);
+            var imageDataUrl = $"data:{file.ContentType};base64,{base64String}";
+
+            selectedImages.Add(imageDataUrl);
+        }
+
+        // To save these images in the product detail's image list
+        productDetail.ProductImageList.AddRange(selectedImages);
+    }
+    private void OnImageCheckboxChanged(ChangeEventArgs e, string image)
+    {
+        if (((bool)e.Value))
+        {
+            if (!selectedImagesToRemove.Contains(image))
+            {
+                selectedImagesToRemove.Add(image);
+            }
+        }
+        else
+        {
+            selectedImagesToRemove.Remove(image);
+        }
+    }
+
+    private void ShowModal()
+    {
+        JS.InvokeVoidAsync("eval", "$('#exampleModal').modal('show');");
+    }
+
+    private void CloseModal()
+    {
+        JS.InvokeVoidAsync("eval", "$('#exampleModal').modal('hide');");
+    }
+}

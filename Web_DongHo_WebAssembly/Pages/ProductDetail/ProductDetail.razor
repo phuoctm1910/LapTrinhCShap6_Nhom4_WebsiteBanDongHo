@@ -1,4 +1,5 @@
 ﻿@page "/productdetail/{ProductId:int}"
+@implements IAsyncDisposable
 @inject HttpClient Http
 @inject IJSRuntime JS
 @inject NavigationManager Navigation
@@ -88,7 +89,6 @@
             box-sizing: border-box;
         }
 </style>
-
 @if (product == null)
 {
     <LoadingIndicator></LoadingIndicator>
@@ -104,20 +104,21 @@ else
                         @if (product != null)
                         {
                             <!--Ảnh Sản Phẩm-->
-                            <div class="col-md-6">
+                            <div class="col-md-7">
                                 <div class="magnifier" style="text-align: center;">
                                     <div class="big-img"></div>
-                                    <img id="main-image" src="images/Product/@product.ProductImages" alt="original image" class="small-img" />
+                                    <img id="main-image" src="images/Product/@(product.ProductImageList != null && product.ProductImageList.Count > 0 ? product.ProductImageList[0] : "default.png")" alt="@product.ProductName" class="small-img" />
                                 </div>
                                 <div class="carousel-wrap my-5">
-                                    @*   <div class="owl-carousel" style="margin: 0 auto;">
-                                            <div class="item"><img src="images/Product/@product.ProductImages" alt="thumbnail image"></div>
-                                            <div class="item"><img src="images/Product/@product.ProductImages" alt="thumbnail image"></div>
-                                            <div class="item"><img src="images/Product/@product.ProductImages" alt="thumbnail image"></div>
-                                        </div> *@
+                                    <div class="owl-carousel" style="margin: 0 auto;">
+                                        @foreach (var image in product.ProductImageList)
+                                        {
+                                            <div class="item"><img src="images/Product/@image" alt="thumbnai image"></div>
+                                        }
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-5">
                                 <div>
                                     <div class="name-prodct">
                                         <span style="font-weight: bold; font-size: 30px;">
@@ -539,24 +540,37 @@ else
     </div>
 
 }
-
-
-
-
-
-
 @code {
     [Parameter]
     public int ProductId { get; set; }
 
     private Product product;
     private string toastMessage;
+    private IJSObjectReference? module;
 
     protected override async Task OnInitializedAsync()
     {
-        var respone = await Http.GetStringAsync($"api/product/{ProductId}");
-        product = JsonConvert.DeserializeObject<Product>(respone);
+        var response = await Http.GetStringAsync($"api/product/{ProductId}");
+        product = JsonConvert.DeserializeObject<Product>(response);
     }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && product != null)
+        {
+            await JS.InvokeVoidAsync("initializeMagnifierAndCarousel");
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (module is not null)
+        {
+            await module.InvokeVoidAsync("cleanup");
+            await module.DisposeAsync();
+        }
+    }
+
     private async Task AddProductToCart(int productId, string username)
     {
         if (string.IsNullOrEmpty(username))
@@ -596,7 +610,7 @@ else
             }
         }
     }
-    
+
     private void ShowToast()
     {
         JS.InvokeVoidAsync("eval", "var toastElement = document.querySelector('.toast'); var toast = new bootstrap.Toast(toastElement); toast.show();");
@@ -616,12 +630,14 @@ else
             Auth.UpdateCartItemCount(0);
         }
     }
+
     public class ApiResponse
     {
         public bool Success { get; set; }
         public string? Message { get; set; }
         public string? Error { get; set; }
     }
+
     public class AddToCartRequest
     {
         public string Username { get; set; }
