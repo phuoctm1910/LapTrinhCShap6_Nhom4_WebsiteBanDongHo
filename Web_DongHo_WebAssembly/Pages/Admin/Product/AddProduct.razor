@@ -113,12 +113,12 @@
                                             <div class="modal-body">
                                                 <div class="mb-3">
                                                     <label for="Origin" class="col-form-label">Xuất xứ:</label>
-                                                    <InputText id="Origin" @bind-Value="product.Origin" class="form-control" required pattern="^[A-Za-zÀ-ỹ][A-Za-zÀ-ỹ\s]*[A-Za-zÀ-ỹ]$" title="Chỉ được điền tên tiếng Việt và không kết thúc bằng dấu cách" />
+                                                    <InputText id="Origin" @bind-Value="product.Origin" class="form-control"  pattern="^[A-Za-zÀ-ỹ][A-Za-zÀ-ỹ\s]*[A-Za-zÀ-ỹ]$" title="Chỉ được điền tên tiếng Việt và không kết thúc bằng dấu cách" />
                                                 </div>
 
                                                 <div class="mb-3">
                                                     <label for="MachineType" class="col-form-label">Loại máy:</label>
-                                                    <InputSelect id="MachineType" @bind-Value="product.MachineType" class="form-control" required>
+                                                    <InputSelect id="MachineType" @bind-Value="product.MachineType" class="form-control" >
                                                         <option value="-1" disabled selected>Chọn loại máy</option>
                                                         <option value="Pin (Quartz)">Pin (Quartz)</option>
                                                         <option value="Cơ tự động (Automatic)">Cơ tự động (Automatic)</option>
@@ -138,7 +138,7 @@
 
                                                 <div class="mb-3">
                                                     <label for="ClockType" class="col-form-label">Loại đồng hồ:</label>
-                                                    <InputSelect id="ClockType" @bind-Value="product.ClockType" class="form-control" required>
+                                                    <InputSelect id="ClockType" @bind-Value="product.ClockType" class="form-control" >
                                                         <option value="-1" disabled selected>Chọn loại động hồ</option>
                                                         <option value="Dauphine">Dauphine</option>
                                                         <option value="Baton">Baton</option>
@@ -179,8 +179,8 @@
 
                                             </div>
                                             <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                                                <button type="button" class="btn btn-primary" data-dismiss="modal">Lưu</button>
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                                                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Lưu</button>
                                             </div>
                                         </div>
                                     </div>

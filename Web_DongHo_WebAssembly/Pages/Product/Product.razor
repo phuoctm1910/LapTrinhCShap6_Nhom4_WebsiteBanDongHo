@@ -437,6 +437,27 @@ else
             Console.WriteLine($"Error fetching products: {ex.Message}");
         }
     }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Initialize the product display
+            await JS.InvokeVoidAsync("initializeProductDisplay");
+        }
+    }
+
+
+    // Example of manually calling a function:
+    public async Task ShowMoreProducts()
+    {
+        await JS.InvokeVoidAsync("showMoreItems", 8);
+    }
+
+    public async Task HideExtraProducts()
+    {
+        await JS.InvokeVoidAsync("hideExtraProducts", 8);
+    }
+
     private async Task AddProductToCart(int productId, string username)
     {
         if (string.IsNullOrEmpty(username))
