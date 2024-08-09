@@ -122,22 +122,18 @@ else
                                 <div>
                                     <div class="name-prodct">
                                         <span style="font-weight: bold; font-size: 30px;">
-                                            ĐỒNG HỒ NAM CASIO F3418
-                                            42mm
+                                            @product.ProductName
                                         </span>
                                     </div>
                                     <div class="default-detail">
                                         <div id="productCode">
-                                            Mã sản phẩm: 1792102
-                                        </div>
-                                        <div id="forGender">
-                                            Giới tính: Nam
+                                            Mã sản phẩm: @product.ProductCode
                                         </div>
                                         <div id="machinery">
-                                            Bộ máy: Quartz
+                                            Bộ máy: @product.MachineType
                                         </div>
                                         <div id="diameter">
-                                            Đường kính: 46mm
+                                            Đường kính: @product.Diameter
                                         </div>
                                     </div>
                                     <div class="price-quantity" style="display: inline-block;">
@@ -430,72 +426,45 @@ else
                             <h4>THÔNG SỐ SẢN PHẨM</h4>
                             <table class="table table-striped">
                                 <tr>
-                                    <td>Thương hiệu:</td>
-                                    <td>CASIO</td>
+                                    <td>Tên sản phẩm:</td>
+                                    <td>@product.ProductName</td>
                                 </tr>
                                 <tr>
                                     <td>Mã sản phẩm:</td>
-                                    <td>1791717</td>
+                                    <td>@product.ProductCode</td>
+                                </tr>
+                                <tr>
+                                    <td>Số lượng:</td>
+                                    <td>@product.ProductStock</td>
+                                </tr>
+                                <tr>
+                                    <td>Giá:</td>
+                                    <td>@product.ProductPrice</td>
                                 </tr>
                                 <tr>
                                     <td>Xuất xứ:</td>
-                                    <td>Mỹ</td>
+                                    <td>@product.Origin</td>
                                 </tr>
                                 <tr>
-                                    <td>Giới tính:</td>
-                                    <td>Nam</td>
+                                    <td>Loại đồng hồ:</td>
+                                    <td>@product.ClockType</td>
                                 </tr>
                                 <tr>
-                                    <td>Loại máy đồng hồ:</td>
-                                    <td>Quart</td>
+                                    <td>Bảo hành:</td>
+                                    <td>@product.Insurrance tháng</td>
                                 </tr>
                                 <tr>
-                                    <td>Chất liệu mặt kính:</td>
-                                    <td>Kính khoáng</td>
+                                    <td>Màu:</td>
+                                    <td>@product.Color</td>
                                 </tr>
                                 <tr>
-                                    <td>Bảo hành quốc tế:</td>
-                                    <td>2 năm</td>
+                                    <td>Mã thương hiệu:</td>
+                                    <td>@product.BrandId</td>
                                 </tr>
                                 <tr>
-                                    <td>Bảo hành tại cửa hàng:</td>
-                                    <td>5 năm</td>
-                                </tr>
-                                <tr>
-                                    <td>Đường kính vỏ:</td>
-                                    <td>42mm</td>
-                                </tr>
-                                <tr>
-                                    <td>Độ dày vỏ:</td>
-                                    <td>10mm</td>
-                                </tr>
-                                <tr>
-                                    <td>Chất liệu vỏ:</td>
-                                    <td>Thép không gỉ</td>
-                                </tr>
-                                <tr>
-                                    <td>Chất liệu dây:</td>
-                                    <td>Dây da</td>
-                                </tr>
-                                <tr>
-                                    <td>Màu mặt số:</td>
-                                    <td>Nâu</td>
-                                </tr>
-                                <tr>
-                                    <td>Loại kim:</td>
-                                    <td>Stick</td>
-                                </tr>
-                                <tr>
-                                    <td>Chống nước:</td>
-                                    <td>WR30</td>
-                                </tr>
-                                <tr>
-                                    <td>Nơi lắp ráp:</td>
-                                    <td>Trung Quốc</td>
-                                </tr>
-                                <tr>
-                                    <td>Phong cách:</td>
-                                    <td>Thanh lịch</td>
+                                    <td>Mã loại:</td>
+                                    <td>@product.CategoryId</td>
+                                    
                                 </tr>
                             </table>
                         </div>
@@ -543,6 +512,7 @@ else
 @code {
     [Parameter]
     public int ProductId { get; set; }
+    private List<Product> listProduct = new List<Product>();
 
     private Product product;
     private string toastMessage;
@@ -630,6 +600,7 @@ else
             Auth.UpdateCartItemCount(0);
         }
     }
+   
 
     public class ApiResponse
     {

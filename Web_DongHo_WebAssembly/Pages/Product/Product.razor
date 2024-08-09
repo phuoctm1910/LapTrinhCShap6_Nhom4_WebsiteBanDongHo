@@ -342,18 +342,13 @@ else
                     THƯƠNG HIỆU
                 </h2>
             </div>
-            <div class="d-flex flex-wrap justify-content-center mt-2 mb-5">
-                <a class="btnSort" style="text-decoration: none">CASIO</a>
-                <a class="btnSort" style="text-decoration: none">CITIZEN</a>
-                <a class="btnSort" style="text-decoration: none">OMEGA</a>
-                <a class="btnSort" style="text-decoration: none">GUCCI</a>
-                <a class="btnSort" style="text-decoration: none">SEIKO</a>
-                <a class="btnSort" style="text-decoration: none">COACH</a>
-                <a class="btnSort" style="text-decoration: none">ALFEX</a>
-                <a class="btnSort" style="text-decoration: none">TOMMY</a>
+            <div class="d-flex justify-content-center flex-wrap">
+                @foreach (var brand in products.GroupBy(p => p.Brand.BrandName).Select(g => g.First().Brand))
+                {
+                    <a class="btnSort mx-2" style="text-decoration: none">@brand.BrandName</a>
+                }
             </div>
         </div>
-
         <!-- Sản phẩm -->
         <div class="row my-3" id="productContainer">
             @if (products == null)
