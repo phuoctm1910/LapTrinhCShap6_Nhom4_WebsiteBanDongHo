@@ -373,9 +373,9 @@ else
                             <div class="card">
                                 <div class="imgBox">
                                     <a class="card-link" href="productdetail/@item.ProductId">
-                                        @if (true)
+                                        @if (item.ProductImageList.Any())
                                         {
-                                            <img src="images/Product/@item.ProductImages" width="280px" height="300px" alt="@item.ProductName" class="watch">
+                                            <img src="images/Product/@item.ProductImageList.First()" width="280px;" height="300px;" alt="@item.ProductName" class="watch">
                                         }
                                         else
                                         {

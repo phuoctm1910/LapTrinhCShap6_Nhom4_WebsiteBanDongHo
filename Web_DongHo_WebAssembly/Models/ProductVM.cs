@@ -56,8 +56,15 @@ namespace Web_DongHo_WebAssembly.Models
             }
             set
             {
-                // Serialize the list to a JSON string
-                ProductImages = JsonConvert.SerializeObject(value);
+                if (value == null || value.Count == 0)
+                {
+                    ProductImages = null;
+                }
+                else
+                {
+                    var serializedImages = JsonConvert.SerializeObject(value);
+                    ProductImages = serializedImages.Replace("\"", "\\\"");
+                }
             }
         }
     }

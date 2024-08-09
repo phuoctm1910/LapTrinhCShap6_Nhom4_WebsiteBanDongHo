@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Web_DongHo_API.Data;
+using Newtonsoft.Json;
 
 namespace Web_DongHo_API.Controllers
 {
@@ -41,24 +42,28 @@ namespace Web_DongHo_API.Controllers
 
         // GET: api/Product/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Product>> GetProduct(int id)
+        public async Task<ActionResult> GetProduct(int id)
         {
-            var product = await _context.Products.FindAsync(id);
+            var product = await _context.Products.FirstOrDefaultAsync(c => c.ProductId == id);
 
             if (product == null)
             {
                 return NotFound();
             }
-
-            return product;
+            var options = new JsonSerializerOptions
+            {
+                ReferenceHandler = ReferenceHandler.Preserve,
+                WriteIndented = true
+            };
+            return new JsonResult(product, options);
         }
 
         // PUT: api/Product/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutProduct(int id, Product product)
+        [HttpPut("EditDetail/{productId:int}")]
+        public async Task<IActionResult> PutProduct(int productId,[FromBody] Product product)
         {
-            if (id != product.ProductId)
+            if (productId != product.ProductId)
             {
                 return BadRequest();
             }
@@ -71,7 +76,7 @@ namespace Web_DongHo_API.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!ProductExists(id))
+                if (!ProductExists(productId))
                 {
                     return NotFound();
                 }
@@ -87,12 +92,20 @@ namespace Web_DongHo_API.Controllers
         // POST: api/Product
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Product>> PostProduct(Product product)
+        public async Task<ActionResult<Product>> PostProduct([FromBody] Product product)
         {
-            _context.Products.Add(product);
-            await _context.SaveChangesAsync();
+            try
+            {
+                product.ProductImages = JsonConvert.SerializeObject(product.ProductImages);
+                _context.Products.Add(product);
+                await _context.SaveChangesAsync();
+                return NoContent();
 
-            return CreatedAtAction("GetProduct", new { id = product.ProductId }, product);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
         }
 
         // DELETE: api/Product/5

@@ -1,0 +1,311 @@
+﻿@page "/admin/productList"
+@inject HttpClient Http
+@inject IJSRuntime JS
+@using Web_DongHo_WebAssembly.Data
+@using Web_DongHo_WebAssembly.Models
+@using Newtonsoft.Json
+@layout AdminLayout
+<style>
+    table thead th {
+        vertical-align: middle !important;
+    }
+</style>
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Danh Sách Sản Phẩm</h3>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body">
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                                <tr class="text-center">
+                                    <th>Tên sản phẩm</th>
+                                    <th>Mã sản phẩm</th>
+                                    <th>Số lượng</th>
+                                    <th>Giá sản phẩm</th>
+                                    <th>Số lượng ảnh</th>
+                                    <th>Thương hiệu</th>
+                                    <th>Dành cho</th>
+                                    <th>Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var product in listProduct)
+                                {
+                                    <tr data-product-id="@product.ProductId" class="text-center align-middle">
+                                        <td>@product.ProductName</td>
+                                        <td>@product.ProductCode</td>
+                                        <td>@product.ProductStock</td>
+                                        <td>@String.Format("{0:C0}", product.ProductPrice)</td>
+                                        <td>@product.ProductImageList.Count</td>
+                                        <td>@product.Brand.BrandName</td>
+                                        <td>@product.Category.CategoryName</td>
+                                        <td>
+                                            <div class="dropdown">
+                                                <button type="button" class="btn btn-info d-inline p-2" data-bs-toggle="modal" data-bs-target="#productDetailsModal" @onclick="() => ShowBillDetails(product.ProductId)">Xem Chi Tiết</button>
+                                                <button class="btn btn-secondary dropdown-toggle d-inline p-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                    Chỉnh Sửa
+                                                </button>
+                                                <div class="dropdown-menu">
+                                                        <a href="/admin/editProduct/@product.ProductId" class="btn dropdown-item">Chỉnh sửa tất cả</a>
+                                                        <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#productEditDetailsModal" @onclick="() => ShowEditBillDetails(product.ProductId)">Chỉnh sửa một vài thông tin</button>
+                                                    </div>
+                                            </div>
+                                            @*<a href="@Url.Action("Delete", "Product", new { id = product.ProductId })" class="btn btn-danger">Xóa</a>*@
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.col -->
+        </div>
+        <!-- /.row -->
+    </div>
+    <!-- /.container-fluid -->
+</section>
+<!-- Modal chi tiết sản phẩm -->
+<div class="modal fade" id="productDetailsModal" tabindex="-1" aria-labelledby="productDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="productDetailsModalLabel">Chi tiết sản phẩm</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-bordered" style="width: 100%; line-height: 35px; text-align: center; font-size: 17px; font-weight: 700;">
+                    <tr>
+                        <th class="col-3 text-right border">Tên:</th>
+                        <td class="col-9">@productDetail.ProductName</td>
+                    </tr>
+                    <tr>
+                        <th class="text-right border">Mã:</th>
+                        <td>@productDetail.ProductCode</td>
+                    </tr>
+                    <tr>
+                        <th class="text-right border">Số lượng:</th>
+                        <td>@productDetail.ProductStock</td>
+                    </tr>
+                    <tr>
+                        <th class="text-right border">Giá:</th>
+                        <td>@String.Format("{0:C0}", productDetail.ProductPrice)</td>
+                    </tr>
+                    <tr>
+                        <th class="text-right border">Xuất xứ:</th>
+                        <td>@productDetail.Origin</td>
+                    </tr>
+                    <tr>
+                        <th class="text-right border">Loại máy:</th>
+                        <td>@productDetail.MachineType</td>
+                    </tr>
+                    <tr>
+                        <th class="text-right border">Đường kính:</th>
+                        <td>@productDetail.Diameter mm</td>
+                    </tr>
+                    <tr>
+                        <th class="text-right border">Loại đồng hồ:</th>
+                        <td>@productDetail.ClockType</td>
+                    </tr>
+                    <tr>
+                        <th class="text-right border">Bảo hành:</th>
+                        <td>@productDetail.Insurrance tháng</td>
+                    </tr>
+                    <tr>
+                        <th class="text-right border">Màu:</th>
+                        <td>@productDetail.Color</td>
+                    </tr>
+                    <tr>
+                        <th class="text-right border">Thương hiệu:</th>
+                        <td>@productDetail.BrandName</td>
+                    </tr>
+                    <tr>
+                        <th class="text-right border">Loại dành cho:</th>
+                        <td>@productDetail.CategoryName</td>
+                    </tr>
+                    <tr>
+                        <th class="text-right border">Ảnh sản phẩm:</th>
+                        <td>
+                            <div class="row" style="justify-content: space-around;">
+                                @foreach (var image in productDetail.ProductImageList)
+                                {
+                                    <div class="col-md-3 mb-2">
+                                        <img src="images/Product/@image" class="img-thumbnail" style="max-width: 100px; max-height: 100px;">
+                                    </div>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal chỉnh sửa sản phẩm -->
+<div class="modal fade" id="productEditDetailsModal" tabindex="-1" role="dialog" aria-labelledby="productEditDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="productEditDetailsModalLabel">Chỉnh sửa thông tin sản phẩm</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editProductForm">
+                    <div class="mb-3">
+                        <label for="editProductOrigin" class="col-form-label">Xuất xứ:</label>
+                        <input type="text" class="form-control" id="editProductOrigin" @bind="productDetail.Origin" required pattern="^[A-Za-z\s]+$" title="Chỉ được điền chữ cái và dấu cách">
+                        <span class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editProductMachineType" class="col-form-label">Loại máy:</label>
+                        <select class="form-control" id="editProductMachineType" @bind="productDetail.MachineType" required>
+                            <option value="-1" disabled selected>Chọn loại máy</option>
+                            <option value="Pin (Quartz)">Pin (Quartz)</option>
+                            <option value="Cơ tự động (Automatic)">Cơ tự động (Automatic)</option>
+                            <option value="Năng lượng ánh sáng (Eco-Drive)">Năng lượng ánh sáng (Eco-Drive)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editProductDiameter" class="col-form-label">Đường kính:</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="editProductDiameter" @bind="productDetail.Diameter" aria-describedby="diameter-addon">
+                            <div class="input-group-append">
+                                <span class="input-group-text" id="diameter-addon">mm</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editProductClockType" class="col-form-label">Loại đồng hồ:</label>
+                        <select class="form-control" id="editProductClockType" @bind="productDetail.ClockType" required>
+                            <option value="-1" disabled selected>Chọn loại động hồ</option>
+                            <option value="Dauphine">Dauphine</option>
+                            <option value="Baton">Baton</option>
+                            <option value="Leaf">Leaf</option>
+                            <option value="Alpha">Alpha</option>
+                            <option value="Stick">Stick</option>
+                            <option value="Arrow">Arrow</option>
+                            <option value="Sword">Sword</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editProductInsurrance" class="col-form-label">Bảo hành:</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="editProductInsurrance" @bind="productDetail.Insurrance" aria-describedby="insurrance-addon" >
+                            <div class="input-group-append">
+                                <span class="input-group-text" id="insurrance-addon">năm</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editProductColor" class="col-form-label">Màu mặt số:</label>
+                        <select class="form-control" id="colorList"  @bind="productDetail.Color">
+                            <option value="Red">Red</option>
+                            <option value="Green">Green</option>
+                            <option value="Blue">Blue</option>
+                            <option value="Yellow">Yellow</option>
+                            <option value="Black">Black</option>
+                            <option value="White">White</option>
+                            <option value="Orange">Orange</option>
+                            <option value="Purple">Purple</option>
+                            <option value="Pink">Pink</option>
+                            <option value="Brown">Brown</option>
+                            <option value="Gray">Gray</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" @onclick="() => SaveProductDetails(productDetail.ProductId)" data-dismiss="modal">Lưu thay đổi</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<Product> listProduct = new List<Product>();
+    private ProductVM productDetail = new ProductVM();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetListProduct();
+    }
+    async Task GetListProduct()
+    {
+        try
+        {
+            var response = await Http.GetStringAsync("api/Product");
+            listProduct = JsonConvert.DeserializeObject<List<Product>>(response);
+            if (listProduct == null)
+            {
+                await JS.InvokeVoidAsync("console.log", "Trống");
+            }
+
+        }
+        catch (Exception e)
+        {
+            await JS.InvokeVoidAsync("console.log", e.Message);
+
+        }
+    }
+
+
+    private async Task LoadProductDetails(int productId)
+    {
+        try
+        {
+            var response = await Http.GetStringAsync($"api/ProductDetail/GetProductDetail/{productId}");
+            productDetail = JsonConvert.DeserializeObject<ProductVM>(response);
+            if (productDetail == null)
+            {
+                await JS.InvokeVoidAsync("console.log", "Trống");
+            }
+
+        }
+        catch (Exception e)
+        {
+            await JS.InvokeVoidAsync("console.log", e.Message);
+
+        }
+    }
+    private async Task SaveProductDetails(int productId)
+    {
+        try
+        {
+            var response = await Http.PutAsJsonAsync($"api/Product/EditDetail/{productId}", productDetail);
+
+            if (response.IsSuccessStatusCode)
+            {
+                await JS.InvokeVoidAsync("alert", "Product details updated successfully.");
+                await JS.InvokeVoidAsync("eval", "$('#productEditDetailsModal').modal('hide');");
+
+            }
+            else
+            {
+                await JS.InvokeVoidAsync("alert", "Failed to update product details.");
+            }
+        }
+        catch (Exception e)
+        {
+            await JS.InvokeVoidAsync("console.log", e.Message);
+        }
+    }
+
+    private async Task ShowBillDetails(int productId)
+    {
+        await LoadProductDetails(productId);
+        await JS.InvokeVoidAsync("eval", "$('#productDetailsModal').modal('show');");
+    }
+    private async Task ShowEditBillDetails(int productId)
+    {
+        await LoadProductDetails(productId);
+        await JS.InvokeVoidAsync("eval", "$('#productEditDetailsModal').modal('show');");
+    }
+}
