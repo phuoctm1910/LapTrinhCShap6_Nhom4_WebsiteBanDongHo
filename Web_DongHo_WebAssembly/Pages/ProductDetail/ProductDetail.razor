@@ -556,7 +556,7 @@ else
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender && product != null)
+        if (firstRender)
         {
             await JS.InvokeVoidAsync("initializeMagnifierAndCarousel");
         }
