@@ -1,4 +1,4 @@
-
+﻿
 class OrderModel {
     constructor(fullName = '', phone = '', address = '', paymentMethod = 'Cash') {
         this.fullName = fullName;
@@ -59,18 +59,42 @@ window.initializeCheckout = (totalAmount, username, orderModelData) => {
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            window.location.href("/");
+                            Swal.fire({
+                                title: 'Thành công!',
+                                text: 'Thanh toán đã được xử lý thành công.',
+                                icon: 'success',
+                                confirmButtonText: 'OK'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    window.location.href = '/historyBill'; 
+                                }
+                            });
                         } else {
                             console.error('Purchase completion failed:', data.message);
+                            Swal.fire({
+                                title: 'Lỗi!',
+                                text: 'Có lỗi khi thực hiện thanh toán',
+                                icon: 'error',
+                                confirmButtonText: 'OK'
+                            });
                         }
                     })
                     .catch(error => {
-                        console.error('Error completing purchase:', error);
+                        
                     });
+            });
+        }
+        , onCancel: function (data) {
+            Swal.fire({
+                title: 'Đã hủy!',
+                text: 'Bạn đã hủy quá trình thanh toán.',
+                icon: 'warning',
+                confirmButtonText: 'OK'
             });
         },
         onError: function (err) {
-            console.error('PayPal checkout error', err);
+            console.error('Error completing purchase:', err);
+
         }
     }).render('#paypal-button-container');
 };

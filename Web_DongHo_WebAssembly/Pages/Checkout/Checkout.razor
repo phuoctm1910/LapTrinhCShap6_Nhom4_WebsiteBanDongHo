@@ -30,7 +30,7 @@
                 <div class="mb-3">
                     <label for="paymentMethod" class="form-label">Phương thức thanh toán:</label>
                     <div class="form-check">
-                        <input type="radio" id="cash" class="form-check-input" name="paymentMethod" value="Cash" @onclick="() => SetPaymentMethod(Cash)"  checked="@orderModel.PaymentMethod.Equals(Cash)" />
+                        <input type="radio" id="cash" class="form-check-input" name="paymentMethod" value="Cash" @onclick="() => SetPaymentMethod(Cash)" checked="@orderModel.PaymentMethod.Equals(Cash)" />
                         <label class="form-check-label" for="cash">Tiền Mặt</label>
                     </div>
                     <div class="form-check">
@@ -48,7 +48,7 @@
                 @if (checkout != null)
                 {
                     <div class="row">
-                        <h4>Giỏ hàng của bạn<span class="badge bg-primary">@checkout?.BillDetails.Count</span></h4>
+                        <h4 class="d-flex justify-content-between">Giỏ hàng của bạn<span class="badge bg-primary">@checkout?.BillDetails.Count</span></h4>
                     </div>
                     <ul class="list-group my-4">
                         @foreach (var item in checkout.BillDetails)
@@ -80,12 +80,24 @@
                 Navigation.NavigateTo("/");
             }
         </div>
+        <div class="toast-container position-fixed top-0 end-0 p-3">
+            <div id="liveToast" class="toast toastCheckout" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header">
+                    <img src="/images/logo2.png" class="rounded me-2" alt="..." width="50px">
+                    <strong class="me-auto">Thông báo</strong>
+                </div>
+                <div class="toast-body">
+                    @toastMessageCheckout
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
 @code {
     public OrderModel orderModel = new OrderModel();
     public Bill checkout;
+    public string toastMessageCheckout { get; set; }
     public int shippingCost;
     public float LastTotalAmount;
     public const string Cash = "Cash";
@@ -100,7 +112,8 @@
         }
         else
         {
-            await JSRuntime.InvokeVoidAsync("alert", "Bạn chưa có sản phẩm nào trong giỏ hàng");
+            ShowToast("Bạn chưa có sản phẩm nào trong giỏ hàng");
+
         }
     }
 
@@ -119,12 +132,12 @@
                 }
                 else
                 {
-                    await JSRuntime.InvokeVoidAsync("alert", "Không thể tải giỏ hàng");
+                    ShowToast("Không thể tải giỏ hàng");
                 }
             }
             catch (Exception ex)
             {
-                await JSRuntime.InvokeVoidAsync("alert", $"Lỗi: {ex.Message}");
+                await JSRuntime.InvokeVoidAsync("console.log", $"Lỗi: {ex.Message}");
             }
         }
         else
@@ -142,21 +155,24 @@
             await JSRuntime.InvokeVoidAsync("console.log", checkout.TotalAmount, totalAllUnit);
         }
     }
-
+    private void ShowToast(string message)
+    {
+        toastMessageCheckout = message;
+        JSRuntime.InvokeVoidAsync("eval", "var toastElement = document.querySelector('.toastCheckout'); var toast = new bootstrap.Toast(toastElement); toast.show();");
+        StateHasChanged();
+    }
     private async Task CompletePurchase()
     {
         var response = await Http.PostAsJsonAsync($"api/Checkout/completePurchase?username={Auth.Username}", orderModel);
         if (response.IsSuccessStatusCode)
         {
-            var isOk = await JSRuntime.InvokeAsync<bool>("showAlertAndConfirm", "Bạn đã thanh toán thành công");
-            if (isOk)
-            {
-                Navigation.NavigateTo("/");
-            }
+            await JSRuntime.InvokeVoidAsync("Swal.fire", "Thành công!", $"Cảm ơn bạn đã thanh toán hóa đơn", "success");
+            Navigation.NavigateTo("/historyBill");
+
         }
         else
         {
-            await JSRuntime.InvokeVoidAsync("alert", "Xảy ra lỗi khi thanh toán");
+            await JSRuntime.InvokeVoidAsync("Swal.fire", "Lỗi!", $"Đã xảy ra lỗi khi thanh toán hóa đơn.", "error");
         }
     }
 
@@ -173,9 +189,6 @@
 
     private async void TogglePayPalButtonVisibility()
     {
-        bool isFormValid = !string.IsNullOrEmpty(orderModel.FullName) &&
-                           !string.IsNullOrEmpty(orderModel.Phone) &&
-                           !string.IsNullOrEmpty(orderModel.Address);
 
         if ( orderModel.PaymentMethod == Paypal)
         {
