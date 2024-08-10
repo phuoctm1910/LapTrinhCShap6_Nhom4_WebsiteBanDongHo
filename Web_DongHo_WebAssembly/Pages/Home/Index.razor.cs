@@ -29,7 +29,7 @@ namespace Web_DongHo_WebAssembly.Pages.Home
 
         private HomeProductRequest homeProductRequest = new HomeProductRequest();
 
-        private string toastMessage { get; set; }
+        private string toastMessageIndex { get; set; }
 
         protected override async Task OnInitializedAsync()
         {
@@ -40,17 +40,13 @@ namespace Web_DongHo_WebAssembly.Pages.Home
         {
             if (firstRender && Auth.IsLoggedIn)
             {
-                await HandleToastMessage($"Chào mừng người dùng {Auth.Username} đã đăng nhập <3");
-
                 await Task.Delay(100);
-                ShowToast();
+
+                ShowToast($"Chào mừng người dùng {Auth.Username} đã đăng nhập <3");
+
             }
         }
-        private async Task HandleToastMessage(string message)
-        {
-            toastMessage = message;
-            StateHasChanged();
-        }
+
         public async Task GetProduct()
         {
             try
@@ -78,9 +74,8 @@ namespace Web_DongHo_WebAssembly.Pages.Home
         {
             if (string.IsNullOrEmpty(username))
             {
-                await HandleToastMessage("Bạn chưa đăng nhập, bạn sẽ được chuyển đến đăng nhập sau ít giây!");
-                ShowToast();
-                await Task.Delay(3000);
+                ShowToast("Bạn chưa đăng nhập, bạn sẽ được chuyển đến đăng nhập sau ít giây!");
+                await Task.Delay(2000);
                 Navigation.NavigateTo("/login");
             }
             else
@@ -94,17 +89,17 @@ namespace Web_DongHo_WebAssembly.Pages.Home
                     {
                         if (!responseContent.Success)
                         {
-                            await JS.InvokeVoidAsync("alert", responseContent.Message);
+                            await JS.InvokeVoidAsync("console.log", responseContent.Message);
                         }
                         else
                         {
-                            await JS.InvokeVoidAsync("alert", "Sản phẩm đã được thêm vào giỏ hàng.");
+                            ShowToast("Sản phẩm đã được thêm vào giỏ hàng.");
                             await UpdateCartItemCount();
                         }
                     }
                     else
                     {
-                        await JS.InvokeVoidAsync("alert", "Phản hồi không hợp lệ từ máy chủ.");
+                        await JS.InvokeVoidAsync("console.log", "Phản hồi không hợp lệ từ máy chủ.");
                     }
                 }
                 catch (Exception ex)
@@ -128,9 +123,11 @@ namespace Web_DongHo_WebAssembly.Pages.Home
             }
         }
 
-        private void ShowToast()
+        private void ShowToast(string message)
         {
-            JS.InvokeVoidAsync("eval", "var toastElement = document.querySelector('.toast'); var toast = new bootstrap.Toast(toastElement); toast.show();");
+            toastMessageIndex = message;
+
+            JS.InvokeVoidAsync("eval", "var toastElement = document.querySelector('.toastIndex'); var toast = new bootstrap.Toast(toastElement); toast.show();");
             StateHasChanged();
         }
     }

@@ -36,7 +36,7 @@
                         {
                             <div class="row border-top border-bottom">
                                 <div class="row main align-items-center">
-                                    <div class="col-2"><img class="imgCart img-fluid" src="images/Product/@item.Product.ProductImages"></div>
+                                    <div class="col-2"><img class="imgCart img-fluid" src="images/Product/@item.Product.ProductImageList.First()"></div>
                                     <div class="col">
                                         <div class="row text-muted">@item.Product.ProductName</div>
                                     </div>
@@ -83,13 +83,13 @@
 
         </div>
         <div class="toast-container position-fixed top-0 end-0 p-3">
-            <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div id="liveToast" class="toast toastCart" role="alert" aria-live="assertive" aria-atomic="true">
                 <div class="toast-header">
                     <img src="/images/logo2.png" class="rounded me-2" alt="..." width="50px">
                     <strong class="me-auto">Thông báo</strong>
                 </div>
                 <div class="toast-body">
-                    @toastMessage
+                    @toastMessageCart
                 </div>
             </div>
         </div>
@@ -103,7 +103,7 @@
     private int discountAmount;
     private string promoCode;
     private int scannedDiscount;
-    private string toastMessage;
+    private string toastMessageCart { get; set; }
     private float LastTotalAmount;
 
     protected override async Task OnInitializedAsync()
@@ -137,9 +137,7 @@
                     cart = JsonConvert.DeserializeObject<Bill>(responseContent);
                     if (cart == null)
                     {
-                        toastMessage = "Bạn chưa có sản phẩm nào trong giỏ hàng";
-                        await Task.Delay(100);
-                        ShowToast();
+                        ShowToast("Bạn chưa có sản phẩm nào trong giỏ hàng");
                     }
                     else
                     {
@@ -148,12 +146,13 @@
                 }
                 else if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
                 {
-                    await JS.InvokeVoidAsync("alert", "Bạn chưa có sản phẩm nào trong giỏ hàng");
+                    ShowToast("Bạn chưa có sản phẩm nào trong giỏ hàng");
+
                 }
                 else
                 {
                     var errorMessage = await response.Content.ReadAsStringAsync();
-                    await JS.InvokeVoidAsync("alert", $"Error: {errorMessage}");
+                    await JS.InvokeVoidAsync("console.log", $"Error: {errorMessage}");
                 }
             }
             else
@@ -163,7 +162,7 @@
         }
         catch (Exception ex)
         {
-            await JS.InvokeVoidAsync("alert", $"An error occurred: {ex.Message}");
+            await JS.InvokeVoidAsync("console.log", $"An error occurred: {ex.Message}");
         }
     }
 
@@ -181,12 +180,12 @@
             else
             {
                 var errorMessage = await response.Content.ReadAsStringAsync();
-                await JS.InvokeVoidAsync("alert", $"Error: {errorMessage}");
+                await JS.InvokeVoidAsync("console.log", $"Error: {errorMessage}");
             }
         }
         catch (Exception ex)
         {
-            await JS.InvokeVoidAsync("alert", $"An error occurred: {ex.Message}");
+            await JS.InvokeVoidAsync("console.log", $"An error occurred: {ex.Message}");
         }
     }
     private void ApplyDiscount(ChangeEventArgs e)
@@ -195,8 +194,7 @@
         if (promoCode == qrCodeText)
         {
             scannedDiscount = discountAmount;
-            toastMessage = $"Bạn được giảm {scannedDiscount.ToString("N0")} ₫!";
-            ShowToast();
+            ShowToast($"Bạn được giảm {scannedDiscount.ToString("N0")} ₫!");
             Task.Delay(1000);
             CalculateTotalAmount();
         }
@@ -205,9 +203,10 @@
             scannedDiscount = 0;
         }
     }
-    private void ShowToast()
+    private void ShowToast(string message)
     {
-        JS.InvokeVoidAsync("eval", "var toastElement = document.querySelector('.toast'); var toast = new bootstrap.Toast(toastElement); toast.show();");
+        toastMessageCart = message;
+        JS.InvokeVoidAsync("eval", "var toastElement = document.querySelector('.toastCart'); var toast = new bootstrap.Toast(toastElement); toast.show();");
         StateHasChanged();
     }
     private async Task ChangeProductQuantity(int billDetailId, int change)
@@ -224,12 +223,12 @@
             else
             {
                 var errorMessage = await response.Content.ReadAsStringAsync();
-                await JS.InvokeVoidAsync("alert", $"Error: {errorMessage}");
+                await JS.InvokeVoidAsync("console.log", $"Error: {errorMessage}");
             }
         }
         catch (Exception ex)
         {
-            await JS.InvokeVoidAsync("alert", $"An error occurred: {ex.Message}");
+            await JS.InvokeVoidAsync("console.log", $"An error occurred: {ex.Message}");
         }
     }
 
@@ -268,7 +267,7 @@
             if (!response.IsSuccessStatusCode)
             {
                 var errorMessage = await response.Content.ReadAsStringAsync();
-                await JS.InvokeVoidAsync("alert", $"Error: {errorMessage}");
+                await JS.InvokeVoidAsync("console.log", $"Error: {errorMessage}");
             }
             else
             {
