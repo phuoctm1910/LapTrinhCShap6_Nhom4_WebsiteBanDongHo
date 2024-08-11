@@ -15,13 +15,13 @@ using Web_DongHo_API.Services;
 using Org.BouncyCastle.Asn1.Ocsp;
 using System.Linq;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Web_DongHo_API.Controllers
 {
     public class UserLoginRequest
     {
         public string UserName { get; set; }
-        public string Email { get; set; }
         public string Password { get; set; }
         public int? RoleId { get; set; }
 
@@ -151,9 +151,9 @@ namespace Web_DongHo_API.Controllers
 
             var hashPassBeforeCheck = PasswordHelper.GetMd5Hash(request.Password);
             var user = await _context.Users
-                .FirstOrDefaultAsync(x =>
-                    (x.UserName.Equals(request.UserName) || x.Email.Equals(request.Email))
-                    && x.Password.Equals(hashPassBeforeCheck));
+                .FirstOrDefaultAsync(x => x.UserName == request.UserName && x.Password == hashPassBeforeCheck);
+
+
             if (user != null)
             {
                 var token = _tokenService.GenerateToken(user.UserName, user.RoleId);
@@ -320,34 +320,37 @@ namespace Web_DongHo_API.Controllers
 
             return Ok(user);
         }
+
+
+
         [HttpPost("change-password")]
-        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+        public async Task<IActionResult> ChangePassword([FromQuery] string username,[FromBody] ChangePasswordRequest request)
         {
-            if (request.NewPassword != request.ConfirmNewPassword)
-            {
-                return BadRequest(new { success = false, message = "Mật khẩu mới và xác nhận mật khẩu không khớp." });
-            }
-
-            var userName = HttpContext.User.Identity.Name;
-            if (string.IsNullOrEmpty(userName))
-            {
-                return Unauthorized(new { success = false, message = "Người dùng chưa đăng nhập." });
-            }
-
+            // Hash the current password entered by the user
             var hashedCurrentPassword = PasswordHelper.GetMd5Hash(request.CurrentPassword);
-            var user = await _context.Users
-                .FirstOrDefaultAsync(u => u.UserName == userName && u.Password == hashedCurrentPassword);
+
+            // Find the user by the hashed current password
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == username);
 
             if (user == null)
             {
-                return BadRequest(new { success = false, message = "Mật khẩu hiện tại không đúng." });
+                return BadRequest("Mật khẩu hiện tại không đúng.");
             }
 
-            user.Password = PasswordHelper.GetMd5Hash(request.NewPassword);
+            // Ensure new password and confirm password match
+            if (request.NewPassword != request.ConfirmNewPassword)
+            {
+                return BadRequest("Mật khẩu mới và xác nhận mật khẩu không khớp.");
+            }
+
+            // Update the user's password with the new hashed password
+            user.Password = PasswordHelper.GetMd5Hash(request.ConfirmNewPassword);
             _context.Users.Update(user);
             await _context.SaveChangesAsync();
 
-            return Ok(new { success = true, message = "Đổi mật khẩu thành công." });
+            return Ok("Đổi mật khẩu thành công.");
         }
+
+
     }
 }
