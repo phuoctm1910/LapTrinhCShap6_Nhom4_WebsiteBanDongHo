@@ -464,57 +464,6 @@ else
                 </div>
 
                 </div>
-                @* <div class="col-md-3" style="background-color: white; border-left: 6px solid #f0efef;">
-                    <div class="row">
-                        <div class="col-md-12 py-5" style="border-bottom: 6px solid #f0efef;">
-                            <h4>THÔNG SỐ SẢN PHẨM</h4>
-                            <table class="table table-striped">
-                                <tr>
-                                    <td>Tên sản phẩm:</td>
-                                    <td>@product.ProductName</td>
-                                </tr>
-                                <tr>
-                                    <td>Mã sản phẩm:</td>
-                                    <td>@product.ProductCode</td>
-                                </tr>
-                                <tr>
-                                    <td>Số lượng:</td>
-                                    <td>@product.ProductStock</td>
-                                </tr>
-                                <tr>
-                                    <td>Giá:</td>
-                                    <td>@product.ProductPrice</td>
-                                </tr>
-                                <tr>
-                                    <td>Xuất xứ:</td>
-                                    <td>@product.Origin</td>
-                                </tr>
-                                <tr>
-                                    <td>Loại đồng hồ:</td>
-                                    <td>@product.ClockType</td>
-                                </tr>
-                                <tr>
-                                    <td>Bảo hành:</td>
-                                    <td>@product.Insurrance tháng</td>
-                                </tr>
-                                <tr>
-                                    <td>Màu:</td>
-                                    <td>@product.Color</td>
-                                </tr>
-                                <tr>
-                                    <td>Mã thương hiệu:</td>
-                                    <td>@product.BrandId</td>
-                                </tr>
-                                <tr>
-                                    <td>Mã loại:</td>
-                                    <td>@product.CategoryId</td>
-                                    
-                                </tr>
-                            </table>
-                        </div>
-                    </div>
-
-                </div> *@
                 <div class="col-md-3 product-details">
                     <div class="row">
                         <div class="col-md-12 py-5">
@@ -642,7 +591,6 @@ else
             </div>
         </div>
     </div>
-</div>
 
 }
 @code {
@@ -696,7 +644,7 @@ else
                 {
                     if (!responseContent.Success)
                     {
-                        await JS.InvokeVoidAsync("alert", responseContent.Message);
+                        await JS.InvokeVoidAsync("console.log", responseContent.Message);
                     }
                     else
                     {
