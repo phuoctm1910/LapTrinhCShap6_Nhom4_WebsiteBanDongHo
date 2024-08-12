@@ -88,6 +88,50 @@
             line-height: 36px;
             box-sizing: border-box;
         }
+
+    .product-details {
+        background-color: white;
+        border-left: 6px solid #f0efef;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+        .product-details h4 {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+            border-bottom: 2px solid #f0efef;
+            padding-bottom: 10px;
+        }
+
+        .product-details table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+            .product-details table td {
+                padding: 15px 15px;
+                vertical-align: middle;
+                font-size: 16px;
+                color: #555;
+            }
+
+            .product-details table tr:nth-child(odd) {
+                background-color: #f9f9f9;
+            }
+
+            .product-details table tr:hover {
+                background-color: #f1f1f1;
+            }
+
+            .product-details table td:first-child {
+                font-weight: bold;
+                color: #333;
+            }
+
+         
 </style>
 @if (product == null)
 {
@@ -95,11 +139,11 @@
 }
 else
 {
-<div style="background-color: #f0efef;">
-    <div class="container" style="background-color: white;width: calc(100% - 300px) !important;">
-        <div class="row">
-            <div class="col-md-9" style="background-color: white;">
-                <div class="row">
+    <div style="background-color: #f0efef;">
+      
+            <div class="row">
+                <div class="col-md-9" style="background-color: white;">
+                    <div class="row">
 
                     @if (product != null)
                     {
@@ -419,62 +463,144 @@ else
                     </div>
                 </div>
 
-            </div>
-            <div class="col-md-3" style="background-color: white; border-left: 6px solid #f0efef;">
-                <div class="row">
-                    <div class="col-md-12 py-5" style="border-bottom: 6px solid #f0efef;">
-                        <h4>THÔNG SỐ SẢN PHẨM</h4>
-                        <table class="table table-striped">
-                            <tr>
-                                <td>Tên sản phẩm:</td>
-                                <td>@product.ProductName</td>
-                            </tr>
-                            <tr>
-                                <td>Mã sản phẩm:</td>
-                                <td>@product.ProductCode</td>
-                            </tr>
-                            <tr>
-                                <td>Số lượng:</td>
-                                <td>@product.ProductStock</td>
-                            </tr>
-                            <tr>
-                                <td>Giá:</td>
-                                <td>@product.ProductPrice</td>
-                            </tr>
-                            <tr>
-                                <td>Xuất xứ:</td>
-                                <td>@product.Origin</td>
-                            </tr>
-                            <tr>
-                                <td>Loại đồng hồ:</td>
-                                <td>@product.ClockType</td>
-                            </tr>
-                            <tr>
-                                <td>Bảo hành:</td>
-                                <td>@product.Insurrance tháng</td>
-                            </tr>
-                            <tr>
-                                <td>Màu:</td>
-                                <td>@product.Color</td>
-                            </tr>
-                            <tr>
-                                <td>Mã thương hiệu:</td>
-                                <td>@product.BrandId</td>
-                            </tr>
-                            <tr>
-                                <td>Mã loại:</td>
-                                <td>@product.CategoryId</td>
+                </div>
+                @* <div class="col-md-3" style="background-color: white; border-left: 6px solid #f0efef;">
+                    <div class="row">
+                        <div class="col-md-12 py-5" style="border-bottom: 6px solid #f0efef;">
+                            <h4>THÔNG SỐ SẢN PHẨM</h4>
+                            <table class="table table-striped">
+                                <tr>
+                                    <td>Tên sản phẩm:</td>
+                                    <td>@product.ProductName</td>
+                                </tr>
+                                <tr>
+                                    <td>Mã sản phẩm:</td>
+                                    <td>@product.ProductCode</td>
+                                </tr>
+                                <tr>
+                                    <td>Số lượng:</td>
+                                    <td>@product.ProductStock</td>
+                                </tr>
+                                <tr>
+                                    <td>Giá:</td>
+                                    <td>@product.ProductPrice</td>
+                                </tr>
+                                <tr>
+                                    <td>Xuất xứ:</td>
+                                    <td>@product.Origin</td>
+                                </tr>
+                                <tr>
+                                    <td>Loại đồng hồ:</td>
+                                    <td>@product.ClockType</td>
+                                </tr>
+                                <tr>
+                                    <td>Bảo hành:</td>
+                                    <td>@product.Insurrance tháng</td>
+                                </tr>
+                                <tr>
+                                    <td>Màu:</td>
+                                    <td>@product.Color</td>
+                                </tr>
+                                <tr>
+                                    <td>Mã thương hiệu:</td>
+                                    <td>@product.BrandId</td>
+                                </tr>
+                                <tr>
+                                    <td>Mã loại:</td>
+                                    <td>@product.CategoryId</td>
+                                    
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
 
-                            </tr>
-                        </table>
+                </div> *@
+                <div class="col-md-3 product-details">
+                    <div class="row">
+                        <div class="col-md-12 py-5">
+                            <h4>THÔNG SỐ SẢN PHẨM</h4>
+                            <table class="table table-striped">
+                                <tr>
+                                    <td>Tên sản phẩm:</td>
+                                    <td>@product.ProductName</td>
+                                </tr>
+                                <tr>
+                                    <td>Mã sản phẩm:</td>
+                                    <td>@product.ProductCode</td>
+                                </tr>
+                                <tr>
+                                    <td>Số lượng:</td>
+                                    <td>@product.ProductStock</td>
+                                </tr>
+                                <tr>
+                                    <td>Giá:</td>
+                                    <td>@product.ProductPrice</td>
+                                </tr>
+                                <tr>
+                                    <td>Xuất xứ:</td>
+                                    <td>@product.Origin</td>
+                                </tr>
+                                <tr>
+                                    <td>Loại đồng hồ:</td>
+                                    <td>@product.ClockType</td>
+                                </tr>
+                                <tr>
+                                    <td>Bảo hành:</td>
+                                    <td>@product.Insurrance tháng</td>
+                                </tr>
+                                <tr>
+                                    <td>Màu:</td>
+                                    <td>@product.Color</td>
+                                </tr>
+                                <tr>
+                                    <td>Mã thương hiệu:</td>
+                                    <td>@product.BrandId</td>
+                                </tr>
+                                <tr>
+                                    <td>Mã loại:</td>
+                                    <td>@product.CategoryId</td>
+                                </tr>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
+             
             </div>
-
         </div>
-    </div>
 
+        <!-- Modal Structure -->
+        <div class="modal fade" id="popupModal" tabindex="-1" aria-labelledby="popupModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="popupModalLabel">Đổi hàng trong vòng 7 ngày</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        Để có thể đổi hàng, cần phải thoả tất cả điều kiện sau:
+                        <ol>
+                            <li>Trong vòng 7 ngày kể từ ngày Quý khách nhận được hàng.</li>
+                            <li>
+                                Đồng hồ còn lớp keo bọc bên ngoài (đối với những đồng hồ bọc keo) và chưa qua sử dụng.
+                            </li>
+                            <li>Không trầy xước dù là nhỏ nhất.</li>
+                            <li>Dây da chưa bị cong, gập, gãy.</li>
+                            <li>
+                                Linh kiện, phụ kiện, tài liệu hướng dẫn sử dụng, tài liệu kỹ thuật, quà tặng kèm theo
+                                (nếu có),… phải còn đầy đủ và không có dấu hiệu đã qua sử dụng.
+                            </li>
+                            <li>
+                                Hộp đựng, bao bì đóng gói sản phẩm còn nguyên vẹn, không bị móp, rách, ố vàng, bị ướt…
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+      
+
+
+    </div>
     <!-- Modal Structure -->
     <div class="modal fade" id="popupModal" tabindex="-1" aria-labelledby="popupModalLabel" aria-hidden="true">
         <div class="modal-dialog">
