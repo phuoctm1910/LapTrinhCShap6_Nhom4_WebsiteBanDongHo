@@ -222,9 +222,9 @@
         if (response.IsSuccessStatusCode)
         {
             var result = await response.Content.ReadFromJsonAsync<RegistrationResponse>();
-            toastMessage = "Registration successful!";
+            toastMessage = "Đăng ký thành công!";
             ShowToast();
-
+            await Task.Delay(2000);
             // Auto-login
             await AutoLogin(result.Token);
         }

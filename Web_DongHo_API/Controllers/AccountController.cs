@@ -181,7 +181,7 @@ namespace Web_DongHo_API.Controllers
 
             if (existingUser)
             {
-                return Conflict(new ErrorResponse { Message = "Username or email already exists." });
+                return Conflict(new ErrorResponse { Message = "Đã tồn tại người dùng." });
             }
 
             var hashedPassword = PasswordHelper.GetMd5Hash(request.Password);
@@ -291,7 +291,7 @@ namespace Web_DongHo_API.Controllers
             _context.Users.Update(userToUpdate);
             await _context.SaveChangesAsync();
 
-            return Ok(new { message = "User information updated successfully." });
+            return Ok(new { message = "Cập nhật thông tin người dùng thành công." });
         }
         [HttpGet("GetUserInfo")]
         public async Task<IActionResult> GetUserInfo([FromQuery] string username)

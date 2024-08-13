@@ -381,7 +381,7 @@ else
                                     </a>
                                 </div>
                                 <div class="contentBox">
-                                    <h3>@item.ProductName</h3>
+                                    <h3 class="text-truncate" style="max-width:250px;">@item.ProductName</h3>
                                     <h2 class="price">@item.ProductPrice.ToString("#,##0").Replace(",", ".") ₫</h2>
                                     <button class="buy bg-btn addProduct" data-product-id="@item.ProductId" @onclick="() => AddProductToCart(item.ProductId, Auth.Username)">Thêm vào giỏ hàng</button>
                                 </div>

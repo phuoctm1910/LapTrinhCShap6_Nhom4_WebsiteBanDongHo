@@ -61,7 +61,7 @@ window.initializeCheckout = (totalAmount, username, orderModelData) => {
                         if (data.success) {
                             Swal.fire({
                                 title: 'Thành công!',
-                                text: 'Thanh toán đã được xử lý thành công.',
+                                text: 'Cảm ơn bạn đã đặt hàng.',
                                 icon: 'success',
                                 confirmButtonText: 'OK'
                             }).then((result) => {

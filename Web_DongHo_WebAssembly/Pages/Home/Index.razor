@@ -256,9 +256,9 @@ else
                                     <div class="card">
                                         <div class="imgBox">
                                             <a class="card-link" href="productdetail/@item.ProductId" asp-controller="ProductDetail" asp-action="Index" asp-route-id="@item.ProductId">
-                                                @if (true) //Vài có admin đổi lại điều kiện và img
+                                                @if (item.ProductImageList.Any())
                                                 {
-                                                    <img src="images/Product/@item.ProductImages" width="280px;" height="300px;" alt="@item.ProductName" class="watch">
+                                                    <img src="images/Product/@item.ProductImageList.First()" width="280px;" height="300px;" alt="@item.ProductName" class="watch">
                                                 }
                                                 else
                                                 {

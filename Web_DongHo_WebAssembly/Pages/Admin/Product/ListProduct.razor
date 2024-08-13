@@ -37,7 +37,7 @@
                                 @foreach (var product in listProduct)
                                 {
                                     <tr data-product-id="@product.ProductId" class="text-center align-middle">
-                                        <td>@product.ProductName</td>
+                                        <td class="text-truncate">@product.ProductName</td>
                                         <td>@product.ProductCode</td>
                                         <td>@product.ProductStock</td>
                                         <td>@String.Format("{0:C0}", product.ProductPrice)</td>

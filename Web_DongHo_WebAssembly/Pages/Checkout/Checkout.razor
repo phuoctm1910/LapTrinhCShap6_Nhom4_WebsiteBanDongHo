@@ -166,7 +166,7 @@
         var response = await Http.PostAsJsonAsync($"api/Checkout/completePurchase?username={Auth.Username}", orderModel);
         if (response.IsSuccessStatusCode)
         {
-            await JSRuntime.InvokeVoidAsync("Swal.fire", "Thành công!", $"Cảm ơn bạn đã thanh toán hóa đơn", "success");
+            await JSRuntime.InvokeVoidAsync("Swal.fire", "Thành công!", $"Cảm ơn bạn đã đặt hàng", "success");
             Navigation.NavigateTo("/historyBill");
 
         }

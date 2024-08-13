@@ -6,292 +6,315 @@
 @layout AdminLayout
 
 @using Newtonsoft.Json
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card card-dark">
-                    <div class="card-header">
-                        <h3 class="card-title">Điền đầy đủ thông tin</h3>
-                    </div>
-                    <div class="card-body">
-                        <EditForm Model="product" OnValidSubmit="HandleValidSubmit">
-                            <DataAnnotationsValidator />
-                            <ValidationSummary />
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card card-dark">
+                <div class="card-header">
+                    <h3 class="card-title">Điền đầy đủ thông tin</h3>
+                </div>
+                <div class="card-body">
+                    <EditForm Model="product" OnValidSubmit="HandleValidSubmit">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
 
-                            <div class="form-group">
-                                <label class="control-label">Mã Sản Phẩm:</label>
-                                <div class="input-group mb-3">
-                                    <InputText id="ProductCode" @bind-Value="product.ProductCode" class="form-control" required />
-
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="control-label">Tên Sản Phẩm:</label>
-                                <div class="input-group mb-3">
-                                    <InputText id="ProductName" @bind-Value="product.ProductName" class="form-control" required />
-
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="control-label">Ảnh Sản Phẩm:</label>
-                                <div class="input-group mb-3">
-                                    <InputFile OnChange="HandleFilesSelected" class="form-control" multiple />
-
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="control-label">Số lượng Sản Phẩm:</label>
-                                <div class="input-group mb-3">
-                                    <InputNumber id="ProductStock" @bind-Value="product.ProductStock" class="form-control" required />
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="control-label">Giá Sản Phẩm:</label>
-                                <div class="input-group mb-3">
-                                    <InputNumber id="ProductPrice" @bind-Value="product.ProductPrice" class="form-control" required />
-
-                                </div>
+                        <div class="form-group">
+                            <label class="control-label">Mã Sản Phẩm:</label>
+                            <div class="input-group mb-3">
+                                <InputText id="ProductCode" @bind-Value="product.ProductCode" class="form-control" required />
 
                             </div>
+                        </div>
 
-                                <div class="form-group">
-                                    <label class="control-label">Loại đồng hồ dành cho:</label>
-                                    <div class="input-group mb-3">
-                                        <InputSelect id="CategoryId" @bind-Value="product.CategoryId" class="form-select form-control" required>
-                                            <option value="-1">Dành cho</option>
-                                            @foreach (var category in listCategory)
-                                            {
-                                                <option value="@category.CategoryId">@category.CategoryName</option>
-                                            }
-                                        </InputSelect>
-                                    </div>
+                        <div class="form-group">
+                            <label class="control-label">Tên Sản Phẩm:</label>
+                            <div class="input-group mb-3">
+                                <InputText id="ProductName" @bind-Value="product.ProductName" class="form-control" required />
 
-                                </div>
+                            </div>
+                        </div>
 
-                                <div class="form-group">
-                                    <label class="control-label">Thương hiệu đồng hồ:</label>
-                                    <div class="input-group mb-3">
-                                        <InputSelect id="BrandId" @bind-Value="product.BrandId" class="form-select form-control" required>
-                                            <option value="-1">Chọn thương hiệu</option>
-                                            @foreach (var brand in listBrand)
-                                            {
-                                                <option value="@brand.BrandId">@brand.BrandName</option>
-                                            }
-                                        </InputSelect>
-                                    </div>
-                                </div>
-                                <div class="form-group my-3">
-                                    <button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                                        Thêm thông tin chi tiết
-                                    </button>
-                                </div>
+                        <div class="form-group">
+                            <label class="control-label">Ảnh Sản Phẩm:</label>
+                            <div class="input-group mb-3">
+                                <InputFile OnChange="HandleFilesSelected" class="form-control" multiple />
 
+                            </div>
+                        </div>
+                        <ul id="selectedImagesList" style="list-style: none; padding: 0;">
+                            @foreach (var image in selectedImages)
+                            {
+                                <li>
+                                    <img src="images/Product/@image" alt="Product Image" width="65" height="70" />
+                                </li>
+                            }
+                        </ul>
+                        <div class="form-group">
+                            <label class="control-label">Số lượng Sản Phẩm:</label>
+                            <div class="input-group mb-3">
+                                <InputNumber id="ProductStock" @bind-Value="product.ProductStock" class="form-control" required />
+                            </div>
+                        </div>
 
-                                <div class="card-footer">
-                                    <button type="submit" class="btn btn-outline-dark">Xác nhận</button>
-                                </div>
-                                <ul id="selectedImagesList" style="list-style: none; padding: 0;">
-                                    @foreach (var image in selectedImages)
+                        <div class="form-group">
+                            <label class="control-label">Giá Sản Phẩm:</label>
+                            <div class="input-group mb-3">
+                                <InputNumber id="ProductPrice" @bind-Value="product.ProductPrice" class="form-control" required />
+
+                            </div>
+
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label">Loại đồng hồ dành cho:</label>
+                            <div class="input-group mb-3">
+                                <InputSelect id="CategoryId" @bind-Value="product.CategoryId" class="form-select form-control" required>
+                                    <option value="-1">Dành cho</option>
+                                    @foreach (var category in listCategory)
                                     {
-                                        <li>
-                                            <img src="images/Product/@image" alt="Product Image" width="65" height="70" />
-                                        </li>
+                                        <option value="@category.CategoryId">@category.CategoryName</option>
                                     }
-                                </ul>
+                                </InputSelect>
+                            </div>
 
-                                <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h1 class="modal-title fs-5" id="exampleModalLabel">Thêm thông tin chi tiết</h1>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <div class="mb-3">
-                                                    <label for="Origin" class="col-form-label">Xuất xứ:</label>
-                                                    <InputText id="Origin" @bind-Value="product.Origin" class="form-control"  pattern="^[A-Za-zÀ-ỹ][A-Za-zÀ-ỹ\s]*[A-Za-zÀ-ỹ]$" title="Chỉ được điền tên tiếng Việt và không kết thúc bằng dấu cách" />
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label">Thương hiệu đồng hồ:</label>
+                            <div class="input-group mb-3">
+                                <InputSelect id="BrandId" @bind-Value="product.BrandId" class="form-select form-control" required>
+                                    <option value="-1">Chọn thương hiệu</option>
+                                    @foreach (var brand in listBrand)
+                                    {
+                                        <option value="@brand.BrandId">@brand.BrandName</option>
+                                    }
+                                </InputSelect>
+                            </div>
+                        </div>
+                        <div class="form-group my-3">
+                            <button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                                Thêm thông tin chi tiết
+                            </button>
+                        </div>
+
+
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-outline-dark">Xác nhận</button>
+                        </div>
+
+
+                        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h1 class="modal-title fs-5" id="exampleModalLabel">Thêm thông tin chi tiết</h1>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="mb-3">
+                                            <label for="Origin" class="col-form-label">Xuất xứ:</label>
+                                            <InputText id="Origin" @bind-Value="product.Origin" class="form-control" pattern="^[A-Za-zÀ-ỹ][A-Za-zÀ-ỹ\s]*[A-Za-zÀ-ỹ]$" title="Chỉ được điền tên tiếng Việt và không kết thúc bằng dấu cách" />
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="MachineType" class="col-form-label">Loại máy:</label>
+                                            <InputSelect id="MachineType" @bind-Value="product.MachineType" class="form-control">
+                                                <option value="-1" disabled selected>Chọn loại máy</option>
+                                                <option value="Pin (Quartz)">Pin (Quartz)</option>
+                                                <option value="Cơ tự động (Automatic)">Cơ tự động (Automatic)</option>
+                                                <option value="Năng lượng ánh sáng (Eco-Drive)">Năng lượng ánh sáng (Eco-Drive)</option>
+                                            </InputSelect>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="Diameter" class="col-form-label">Đường kính:</label>
+                                            <div class="input-group">
+                                                <InputNumber id="Diameter" @bind-Value="product.Diameter" class="form-control" aria-describedby="diameter-addon" />
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text" id="diameter-addon">mm</span>
                                                 </div>
-
-                                                <div class="mb-3">
-                                                    <label for="MachineType" class="col-form-label">Loại máy:</label>
-                                                    <InputSelect id="MachineType" @bind-Value="product.MachineType" class="form-control" >
-                                                        <option value="-1" disabled selected>Chọn loại máy</option>
-                                                        <option value="Pin (Quartz)">Pin (Quartz)</option>
-                                                        <option value="Cơ tự động (Automatic)">Cơ tự động (Automatic)</option>
-                                                        <option value="Năng lượng ánh sáng (Eco-Drive)">Năng lượng ánh sáng (Eco-Drive)</option>
-                                                    </InputSelect>
-                                                </div>
-
-                                                <div class="mb-3">
-                                                    <label for="Diameter" class="col-form-label">Đường kính:</label>
-                                                    <div class="input-group">
-                                                        <InputNumber id="Diameter" @bind-Value="product.Diameter" class="form-control" aria-describedby="diameter-addon" />
-                                                        <div class="input-group-append">
-                                                            <span class="input-group-text" id="diameter-addon">mm</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div class="mb-3">
-                                                    <label for="ClockType" class="col-form-label">Loại đồng hồ:</label>
-                                                    <InputSelect id="ClockType" @bind-Value="product.ClockType" class="form-control" >
-                                                        <option value="-1" disabled selected>Chọn loại động hồ</option>
-                                                        <option value="Dauphine">Dauphine</option>
-                                                        <option value="Baton">Baton</option>
-                                                        <option value="Leaf">Leaf</option>
-                                                        <option value="Alpha">Alpha</option>
-                                                        <option value="Stick">Stick</option>
-                                                        <option value="Arrow">Arrow</option>
-                                                        <option value="Sword">Sword</option>
-                                                    </InputSelect>
-                                                </div>
-
-                                                <div class="mb-3">
-                                                    <label for="Insurrance" class="col-form-label">Bảo hành:</label>
-                                                    <div class="input-group">
-                                                        <InputNumber id="Insurrance" @bind-Value="product.Insurrance" class="form-control" aria-describedby="insurrance-addon" />
-                                                        <div class="input-group-append">
-                                                            <span class="input-group-text" id="insurrance-addon">năm</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div class="mb-3">
-                                                    <label for="Color" class="col-form-label">Màu mặt số:</label>
-                                                    <InputSelect id="colorList" @bind-Value="product.Color" class="form-control">
-                                                        <option value="Red">Red</option>
-                                                        <option value="Green">Green</option>
-                                                        <option value="Blue">Blue</option>
-                                                        <option value="Yellow">Yellow</option>
-                                                        <option value="Black">Black</option>
-                                                        <option value="White">White</option>
-                                                        <option value="Orange">Orange</option>
-                                                        <option value="Purple">Purple</option>
-                                                        <option value="Pink">Pink</option>
-                                                        <option value="Brown">Brown</option>
-                                                        <option value="Gray">Gray</option>
-                                                    </InputSelect>
-                                                </div>
-
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                                                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Lưu</button>
                                             </div>
                                         </div>
+
+                                        <div class="mb-3">
+                                            <label for="ClockType" class="col-form-label">Loại đồng hồ:</label>
+                                            <InputSelect id="ClockType" @bind-Value="product.ClockType" class="form-control">
+                                                <option value="-1" disabled selected>Chọn loại động hồ</option>
+                                                <option value="Dauphine">Dauphine</option>
+                                                <option value="Baton">Baton</option>
+                                                <option value="Leaf">Leaf</option>
+                                                <option value="Alpha">Alpha</option>
+                                                <option value="Stick">Stick</option>
+                                                <option value="Arrow">Arrow</option>
+                                                <option value="Sword">Sword</option>
+                                            </InputSelect>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="Insurrance" class="col-form-label">Bảo hành:</label>
+                                            <div class="input-group">
+                                                <InputNumber id="Insurrance" @bind-Value="product.Insurrance" class="form-control" aria-describedby="insurrance-addon" />
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text" id="insurrance-addon">năm</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="Color" class="col-form-label">Màu mặt số:</label>
+                                            <InputSelect id="colorList" @bind-Value="product.Color" class="form-control">
+                                                <option value="Red">Red</option>
+                                                <option value="Green">Green</option>
+                                                <option value="Blue">Blue</option>
+                                                <option value="Yellow">Yellow</option>
+                                                <option value="Black">Black</option>
+                                                <option value="White">White</option>
+                                                <option value="Orange">Orange</option>
+                                                <option value="Purple">Purple</option>
+                                                <option value="Pink">Pink</option>
+                                                <option value="Brown">Brown</option>
+                                                <option value="Gray">Gray</option>
+                                            </InputSelect>
+                                        </div>
+
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Lưu</button>
                                     </div>
                                 </div>
-
-</EditForm>
-
-                    </div>
+                            </div>
+                        </div>
+                        <div class="toast-container position-fixed bottom-0 end-0 p-3">
+                            <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                                <div class="toast-header">
+                                    <img src="/images/logo2.png" class="rounded me-2" alt="..." width="50px">
+                                    <strong class="me-auto">Thông báo</strong>
+                                </div>
+                                <div class="toast-body">
+                                    @toastMessage
+                                </div>
+                            </div>
+                        </div>
+                    </EditForm>
+                    
                 </div>
             </div>
         </div>
     </div>
+</div>
 
 
 
 
-    @code {
-        private ProductVM product = new();
-        private List<Category> listCategory = new();
-        private List<Brand> listBrand = new();
-        private List<string> selectedImages = new();
-        private List<IBrowserFile> filesToUpload = new();
+@code {
+    private ProductVM product = new();
+    private List<Category> listCategory = new();
+    private List<Brand> listBrand = new();
+    private List<string> selectedImages = new();
+    private List<IBrowserFile> filesToUpload = new();
+    public string toastMessage { get; set; }
 
-        protected override async Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
+    {
+        await GetListCategory();
+        await GetListBrand();
+    }
+
+    async Task GetListBrand()
+    {
+        try
         {
-            await GetListCategory();
-            await GetListBrand();
-        }
-
-        async Task GetListBrand()
-        {
-            try
+            var response = await Http.GetStringAsync("api/brand");
+            listBrand = JsonConvert.DeserializeObject<List<Brand>>(response);
+            if (listBrand == null)
             {
-                var response = await Http.GetStringAsync("api/brand");
-                listBrand = JsonConvert.DeserializeObject<List<Brand>>(response);
-                if (listBrand == null)
-                {
-                    await JS.InvokeVoidAsync("console.log", "Trống");
-                }
-            }
-            catch (Exception e)
-            {
-                await JS.InvokeVoidAsync("console.log", e.Message);
+                await JS.InvokeVoidAsync("console.log", "Trống");
             }
         }
-
-        async Task GetListCategory()
+        catch (Exception e)
         {
-            try
+            await JS.InvokeVoidAsync("console.log", e.Message);
+        }
+    }
+
+    async Task GetListCategory()
+    {
+        try
+        {
+            var response = await Http.GetStringAsync("api/Category");
+            listCategory = JsonConvert.DeserializeObject<List<Category>>(response);
+            if (listCategory == null)
             {
-                var response = await Http.GetStringAsync("api/Category");
-                listCategory = JsonConvert.DeserializeObject<List<Category>>(response);
-                if (listCategory == null)
-                {
-                    await JS.InvokeVoidAsync("console.log", "Trống");
-                }
-            }
-            catch (Exception e)
-            {
-                await JS.InvokeVoidAsync("console.log", e.Message);
+                await JS.InvokeVoidAsync("console.log", "Trống");
             }
         }
-
-        private async Task HandleValidSubmit()
+        catch (Exception e)
         {
-
-            product.ProductImages = JsonConvert.SerializeObject(selectedImages);
-            await JS.InvokeVoidAsync("console.log", product.ClockType);
-            await JS.InvokeVoidAsync("console.log", product.MachineType);
-
-            var response = await Http.PostAsJsonAsync("api/product", product);
-            await UploadFiles();
-
-            if (response.IsSuccessStatusCode)
-            {
-                Navigation.NavigateTo("/");
-            }
-            else
-            {
-                // Handle error
-            }
+            await JS.InvokeVoidAsync("console.log", e.Message);
         }
+    }
 
-        private void HandleFilesSelected(InputFileChangeEventArgs e)
+    private async Task HandleValidSubmit()
+    {
+
+        product.ProductImages = JsonConvert.SerializeObject(selectedImages);
+
+        var response = await Http.PostAsJsonAsync("api/product", product);
+        await UploadFiles();
+
+        if (response.IsSuccessStatusCode)
         {
-            filesToUpload = e.GetMultipleFiles().ToList();
-            selectedImages.Clear();
+            toastMessage = "Thêm sản phẩm thành công!";
+            ShowToast();
+            await Task.Delay(2000);
+            await BackToAdmin();
 
-            foreach (var file in filesToUpload)
-            {
-                var filePath = $"{file.Name}";
-                selectedImages.Add(filePath);
-            }
         }
-
-        private async Task UploadFiles()
+        else
         {
-            foreach (var file in filesToUpload)
+            // Handle error
+        }
+    }
+
+    private void HandleFilesSelected(InputFileChangeEventArgs e)
+    {
+        filesToUpload = e.GetMultipleFiles().ToList();
+        selectedImages.Clear();
+
+        foreach (var file in filesToUpload)
+        {
+            var filePath = $"{file.Name}";
+            selectedImages.Add(filePath);
+        }
+    }
+
+    private async Task UploadFiles()
+    {
+        foreach (var file in filesToUpload)
+        {
+            var content = new MultipartFormDataContent();
+            var fileContent = new StreamContent(file.OpenReadStream(long.MaxValue));
+            fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(file.ContentType);
+            content.Add(fileContent, "file", file.Name);
+
+            var response = await Http.PostAsync("api/upload", content);
+            await JS.InvokeVoidAsync("console.log", content);
+
+            if (!response.IsSuccessStatusCode)
             {
-                var content = new MultipartFormDataContent();
-                var fileContent = new StreamContent(file.OpenReadStream(long.MaxValue));
-                fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(file.ContentType);
-                content.Add(fileContent, "file", file.Name);
-
-                var response = await Http.PostAsync("api/upload", content);
-                await JS.InvokeVoidAsync("console.log", content);
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    await JS.InvokeVoidAsync("console.log", "Up ảnh thất bại");
-                }
+                await JS.InvokeVoidAsync("console.log", "Up ảnh thất bại");
             }
         }
     }
+    private void ShowToast()
+    {
+        JS.InvokeVoidAsync("eval", "var toastElement = document.querySelector('.toast'); var toast = new bootstrap.Toast(toastElement); toast.show();");
+        StateHasChanged();
+    }
+    async Task BackToAdmin()
+    {
+        Navigation.NavigateTo("/admin/productList");
+
+    }
+}
